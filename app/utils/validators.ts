@@ -71,22 +71,26 @@ export function mascaraTelefone(valor: string) {
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
-export function formatarTelefone(digitos: string | null | undefined) {
-  return digitos ? mascaraTelefone(digitos) : null;
-}
-export function formatarCpf(digitos: string | null | undefined) {
-  return digitos ? mascaraCpf(digitos) : null;
-}
-export function formatarNis(digitos: string | null | undefined) {
-  return digitos ? mascaraNis(digitos) : null;
-}
+// Exibição de valores guardados só com dígitos: vazio/nulo vira null.
+const formatarOuNulo = (mascara: (v: string) => string) => (digitos: string | null | undefined) =>
+  digitos ? mascara(digitos) : null;
+
+export const formatarTelefone = formatarOuNulo(mascaraTelefone);
+export const formatarCpf = formatarOuNulo(mascaraCpf);
+export const formatarNis = formatarOuNulo(mascaraNis);
 
 // ---------- Nomes ----------
 const NOME_VALIDO = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ'’. -]*$/;
 export const nomeValido = (s: string) => NOME_VALIDO.test(s);
 
 // ---------- Datas ----------
-// data no formato AAAA-MM-DD (valor de <input type="date">); não pode ser futura nem anterior a 2000.
+// Data local no formato AAAA-MM-DD (o mesmo valor de <input type="date">).
+export function dataLocalIso(data = new Date()) {
+  const dois = (n: number) => String(n).padStart(2, "0");
+  return `${data.getFullYear()}-${dois(data.getMonth() + 1)}-${dois(data.getDate())}`;
+}
+
+// Não pode ser futura nem anterior a 2000.
 export function validarDataEntrevista(valor: string, hoje = new Date()) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return "Informe uma data válida.";
   const [a, m, d] = valor.split("-").map(Number);
@@ -94,8 +98,7 @@ export function validarDataEntrevista(valor: string, hoje = new Date()) {
   if (data.getUTCFullYear() !== a || data.getUTCMonth() !== m - 1 || data.getUTCDate() !== d) {
     return "Informe uma data válida.";
   }
-  const hojeIso = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
-  if (valor > hojeIso) return "A data da entrevista não pode ser futura.";
+  if (valor > dataLocalIso(hoje)) return "A data da entrevista não pode ser futura.";
   if (a < 2000) return "Data da entrevista anterior a 2000 não é aceita.";
   return null;
 }

@@ -1,6 +1,7 @@
 import { getSupabaseClient } from "~/utils/supabase.server";
 import type { NotaRow, PessoaRow, StatusAcompanhamento } from "~/utils/supabase.types";
 
+const DIA_MS = 24 * 60 * 60 * 1000;
 const ATUALIZACAO_LIMITE_DIAS = 30;
 const ATUALIZACAO_LIMITE_MESES = 24; // RF13 — Guia de Cadastramento MDS / Decreto 6.135
 
@@ -105,8 +106,8 @@ export async function listarNotas(pessoaId: string) {
 export async function obterIndicadores() {
   const pessoas = await listarPessoas();
   const agora = Date.now();
-  const seteDias = 7 * 24 * 60 * 60 * 1000;
-  const trintaDias = ATUALIZACAO_LIMITE_DIAS * 24 * 60 * 60 * 1000;
+  const seteDias = 7 * DIA_MS;
+  const trintaDias = ATUALIZACAO_LIMITE_DIAS * DIA_MS;
 
   return {
     totalCadastrados: pessoas.length,
@@ -123,6 +124,6 @@ export async function obterIndicadores() {
 
 // RF13 — sinaliza cadastros sem atualização há mais de 24 meses
 export function precisaReentrevista(pessoa: PessoaRow) {
-  const limite = ATUALIZACAO_LIMITE_MESES * 30 * 24 * 60 * 60 * 1000;
+  const limite = ATUALIZACAO_LIMITE_MESES * 30 * DIA_MS;
   return Date.now() - new Date(pessoa.ultima_atualizacao).getTime() > limite;
 }

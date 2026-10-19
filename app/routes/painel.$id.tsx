@@ -1,4 +1,7 @@
-import { Form, useLoaderData } from "react-router";
+import { Form, Link, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
+import { Alerta } from "~/components/Alerta";
+import { Botao } from "~/components/Botao";
+import { Rotulo } from "~/components/campos";
 import type { Route } from "./+types/painel.$id";
 import {
   adicionarNota,
@@ -7,6 +10,7 @@ import {
   obterPessoa,
   precisaReentrevista,
 } from "~/models/pessoa.server";
+import { STATUS_OPCOES, STATUS_ROTULO } from "~/utils/status";
 import type { StatusAcompanhamento } from "~/utils/supabase.types";
 import {
   ATIVIDADES_COMUNITARIAS,
@@ -23,12 +27,9 @@ import {
 } from "~/utils/formulario-suplementar2";
 import { formatarCpf, formatarNis, formatarTelefone } from "~/utils/validators";
 
-const STATUS_OPCOES: StatusAcompanhamento[] = [
-  "novo",
-  "em_acompanhamento",
-  "busca_familiar",
-  "vinculado_a_servico",
-];
+export function meta({}: Route.MetaArgs) {
+  return [{ title: "Ficha de acompanhamento — NaRua" }];
+}
 
 export async function loader({ params }: Route.LoaderArgs) {
   const pessoa = await obterPessoa(params.id!);
@@ -50,21 +51,31 @@ export async function action({ request, params }: Route.ActionArgs) {
     }
   }
 
-  return { ok: true };
+  return { ok: true, intent: String(intent) };
 }
 
 export default function DetalhesPessoa() {
   const { pessoa, notas, reentrevista } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+  const [searchParams] = useSearchParams();
+  const intencao = navigation.state === "submitting" ? String(navigation.formData?.get("intent")) : null;
 
   return (
-    <main className="max-w-3xl mx-auto p-6 space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">{pessoa.nome}</h1>
-        {pessoa.apelido && <p className="text-gray-500">"{pessoa.apelido}"</p>}
+    <main className="mx-auto max-w-3xl space-y-6 px-4 py-6 md:py-10">
+      <Link to="/painel" className="inline-flex min-h-11 items-center text-sm underline">
+        ← Voltar ao painel
+      </Link>
+      <div className="space-y-3">
+        <h1 className="text-2xl font-semibold md:text-3xl">{pessoa.nome}</h1>
+        {pessoa.apelido && <p className="text-gray-700 dark:text-gray-300">"{pessoa.apelido}"</p>}
+        {searchParams.get("criado") === "1" && !actionData && (
+          <Alerta tipo="sucesso">Cadastro concluído com sucesso. Esta é a ficha da pessoa cadastrada.</Alerta>
+        )}
+        {actionData?.intent === "status" && <Alerta tipo="sucesso">Status atualizado.</Alerta>}
+        {actionData?.intent === "nota" && <Alerta tipo="sucesso">Anotação adicionada.</Alerta>}
         {reentrevista && (
-          <p className="mt-2 rounded bg-amber-100 text-amber-800 p-3 text-sm">
-            Cadastro sem atualização há mais de 24 meses — recomenda-se nova entrevista (RF13).
-          </p>
+          <Alerta tipo="info">Cadastro sem atualização há mais de 24 meses — recomenda-se nova entrevista (RF13).</Alerta>
         )}
       </div>
 
@@ -113,59 +124,64 @@ export default function DetalhesPessoa() {
       </Secao>
 
       {pessoa.assinatura_rf && (
-        <section>
-          <h2 className="font-medium mb-2">Assinatura do responsável familiar</h2>
-          <img src={pessoa.assinatura_rf} alt="Assinatura do responsável familiar" className="h-24 rounded border bg-white" />
+        <section className="cartao">
+          <h2 className="mb-3 text-lg font-semibold">Assinatura do responsável familiar</h2>
+          <img src={pessoa.assinatura_rf} alt="Assinatura do responsável familiar" className="h-24 rounded-lg border border-gray-300 bg-white" />
         </section>
       )}
 
-      <Form method="post" className="flex items-center gap-3">
-        <input type="hidden" name="intent" value="status" />
-        <label className="text-sm font-medium">Status:</label>
-        <select name="status" defaultValue={pessoa.status} className="rounded border px-3 py-2">
-          {STATUS_OPCOES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <button type="submit" className="px-4 py-2 rounded border">
-          Atualizar
-        </button>
-      </Form>
+      <section className="cartao">
+        <h2 className="mb-3 text-lg font-semibold">Status de acompanhamento</h2>
+        <Form method="post" className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <input type="hidden" name="intent" value="status" />
+          <div className="sm:w-64">
+            <label htmlFor="status" className="mb-1.5 block text-sm font-medium">Status</label>
+            <select id="status" name="status" defaultValue={pessoa.status} className="campo">
+              {STATUS_OPCOES.map((s) => (
+                <option key={s} value={s}>
+                  {STATUS_ROTULO[s]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Botao type="submit" variante="secundario" carregando={intencao === "status"} textoCarregando="Atualizando...">
+            Atualizar status
+          </Botao>
+        </Form>
+      </section>
 
-      <section>
-        <h2 className="font-medium mb-3">Histórico de anotações</h2>
-        <Form method="post" className="space-y-2 mb-4">
+      <section className="cartao">
+        <h2 className="mb-3 text-lg font-semibold">Histórico de anotações</h2>
+        <Form method="post" key={notas.length} className="mb-5 space-y-4">
           <input type="hidden" name="intent" value="nota" />
-          <textarea
-            name="texto"
-            placeholder="Nova anotação de acompanhamento"
-            required
-            className="w-full rounded border px-3 py-2"
-          />
-          <input
-            name="autor"
-            placeholder="Seu nome"
-            required
-            className="w-full rounded border px-3 py-2"
-          />
-          <button type="submit" className="px-4 py-2 rounded bg-emerald-600 text-white">
+          <div>
+            <label htmlFor="texto" className="mb-1.5 block text-sm font-medium">
+              <Rotulo obrigatorio>Nova anotação de acompanhamento</Rotulo>
+            </label>
+            <textarea id="texto" name="texto" required rows={3} className="campo" />
+          </div>
+          <div>
+            <label htmlFor="autor" className="mb-1.5 block text-sm font-medium">
+              <Rotulo obrigatorio>Seu nome</Rotulo>
+            </label>
+            <input id="autor" name="autor" required autoComplete="name" className="campo" />
+          </div>
+          <Botao type="submit" carregando={intencao === "nota"} textoCarregando="Salvando...">
             Adicionar anotação
-          </button>
+          </Botao>
         </Form>
 
         <ul className="space-y-3">
           {notas.map((n) => (
-            <li key={n.id} className="rounded border p-3 text-sm">
-              <p>{n.texto}</p>
-              <p className="text-gray-500 mt-1">
+            <li key={n.id} className="rounded-lg border border-gray-200 p-3 text-sm dark:border-gray-700">
+              <p className="whitespace-pre-line break-words">{n.texto}</p>
+              <p className="mt-1 text-gray-700 dark:text-gray-300">
                 {n.autor} — {new Date(n.ts).toLocaleString("pt-BR")}
               </p>
             </li>
           ))}
           {notas.length === 0 && (
-            <li className="text-gray-500 text-sm">Nenhuma anotação registrada.</li>
+            <li className="text-sm text-gray-700 dark:text-gray-300">Nenhuma anotação registrada.</li>
           )}
         </ul>
       </section>
@@ -177,18 +193,18 @@ const simNao = (v: boolean | null) => (v == null ? null : v ? "Sim" : "Não");
 
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <section>
-      <h2 className="font-medium mb-2">{titulo}</h2>
-      <div className="grid grid-cols-2 gap-4 text-sm">{children}</div>
+    <section className="cartao">
+      <h2 className="mb-4 text-lg font-semibold">{titulo}</h2>
+      <dl className="grid gap-4 text-sm sm:grid-cols-2">{children}</dl>
     </section>
   );
 }
 
 function Info({ label, valor }: { label: string; valor: string | null }) {
   return (
-    <div>
-      <p className="text-gray-500">{label}</p>
-      <p className="font-medium">{valor || "—"}</p>
+    <div className="min-w-0">
+      <dt className="text-gray-700 dark:text-gray-300">{label}</dt>
+      <dd className="break-words font-medium">{valor || "—"}</dd>
     </div>
   );
 }

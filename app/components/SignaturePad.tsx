@@ -1,8 +1,10 @@
 import { useRef, useState } from "react";
-import { Erro } from "./campos";
+import { Erro, Rotulo } from "./campos";
 
 // Campo de assinatura em tela. O traço vira uma imagem PNG (data URL) num input oculto com o `name` informado.
-export function SignaturePad({ label, name, erro }: { label: string; name: string; erro?: string }) {
+export function SignaturePad({
+  label, name, erro, obrigatorio,
+}: { label: string; name: string; erro?: string; obrigatorio?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const desenhando = useRef(false);
   const [valor, setValor] = useState("");
@@ -49,21 +51,23 @@ export function SignaturePad({ label, name, erro }: { label: string; name: strin
 
   return (
     <div>
-      <p className="text-sm font-medium mb-1">{label}</p>
+      <p className="mb-1.5 text-sm font-medium">
+        <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>
+      </p>
       <canvas
         ref={canvasRef}
         width={600}
         height={180}
         role="img"
         aria-label={`Área para desenhar: ${label}`}
-        className={`w-full touch-none rounded border bg-white ${erro ? "border-red-500" : ""}`}
+        className={`w-full touch-none rounded-lg border bg-white ${erro ? "border-red-600" : "border-gray-500"}`}
         onPointerDown={iniciar}
         onPointerMove={mover}
         onPointerUp={terminar}
         onPointerCancel={terminar}
       />
       <input type="hidden" name={name} value={valor} />
-      <button type="button" onClick={limpar} className="mt-1 text-sm underline">
+      <button type="button" onClick={limpar} className="mt-1 inline-flex min-h-11 items-center text-sm underline">
         Limpar assinatura
       </button>
       <Erro id={`${name}-erro`} mensagem={erro} />

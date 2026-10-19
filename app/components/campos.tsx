@@ -1,16 +1,34 @@
 import type { ReactNode } from "react";
 import type { Opcao } from "~/utils/formulario-suplementar2";
-
-const BASE = "w-full rounded border px-3 py-2";
-const COM_ERRO = "border-red-500";
+import { IconeAlerta } from "./Alerta";
 
 export function Erro({ id, mensagem }: { id: string; mensagem?: string }) {
   if (!mensagem) return null;
   return (
-    <p id={id} role="alert" className="mt-1 text-sm text-red-500">
-      {mensagem}
+    <p id={id} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-red-700 dark:text-red-300">
+      <IconeAlerta tipo="erro" className="mt-0.5 h-4 w-4 shrink-0" />
+      <span>{mensagem}</span>
     </p>
   );
+}
+
+export function Rotulo({ children, obrigatorio }: { children: ReactNode; obrigatorio?: boolean }) {
+  return (
+    <>
+      {children}
+      {obrigatorio && (
+        <>
+          <span aria-hidden="true" className="text-red-700 dark:text-red-300"> *</span>
+          <span className="sr-only"> (obrigatório)</span>
+        </>
+      )}
+    </>
+  );
+}
+
+// Agrupa campos curtos lado a lado a partir de 640 px.
+export function Linha({ children }: { children: ReactNode }) {
+  return <div className="grid gap-4 sm:grid-cols-2">{children}</div>;
 }
 
 interface CampoProps {
@@ -19,7 +37,7 @@ interface CampoProps {
   erro?: string;
   dica?: string;
   type?: string;
-  required?: boolean;
+  obrigatorio?: boolean;
   textarea?: boolean;
   mascara?: (valor: string) => string;
   inputMode?: "numeric" | "tel" | "text";
@@ -31,27 +49,27 @@ interface CampoProps {
 }
 
 export function Campo({
-  label, name, erro, dica, type = "text", required, textarea, mascara, inputMode, maxLength,
+  label, name, erro, dica, type = "text", obrigatorio, textarea, mascara, inputMode, maxLength,
   autoComplete = "off", placeholder, min, max,
 }: CampoProps) {
   const comum = {
     name,
     id: name,
-    required,
     maxLength,
     placeholder,
     autoComplete,
+    "aria-required": obrigatorio || undefined,
     "aria-invalid": erro ? true : undefined,
     "aria-describedby": erro ? `${name}-erro` : dica ? `${name}-dica` : undefined,
-    className: `${BASE} ${erro ? COM_ERRO : ""}`,
+    className: "campo",
   };
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium mb-1">
-        {label}
+      <label htmlFor={name} className="mb-1.5 block text-sm font-medium">
+        <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>
       </label>
       {textarea ? (
-        <textarea {...comum} />
+        <textarea {...comum} rows={3} />
       ) : (
         <input
           {...comum}
@@ -63,7 +81,7 @@ export function Campo({
         />
       )}
       {dica && !erro && (
-        <p id={`${name}-dica`} className="mt-1 text-xs text-gray-500">
+        <p id={`${name}-dica`} className="mt-1.5 text-xs text-gray-600 dark:text-gray-300">
           {dica}
         </p>
       )}
@@ -73,27 +91,29 @@ export function Campo({
 }
 
 export function Selecao({
-  label, name, erro, opcoes, vazio = "Selecione", defaultValue = "",
+  label, name, erro, opcoes, obrigatorio, vazio = "Selecione", defaultValue = "",
 }: {
   label: string;
   name: string;
   erro?: string;
   opcoes: readonly (string | Opcao)[];
+  obrigatorio?: boolean;
   vazio?: string;
   defaultValue?: string;
 }) {
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium mb-1">
-        {label}
+      <label htmlFor={name} className="mb-1.5 block text-sm font-medium">
+        <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>
       </label>
       <select
         id={name}
         name={name}
         defaultValue={defaultValue}
+        aria-required={obrigatorio || undefined}
         aria-invalid={erro ? true : undefined}
         aria-describedby={erro ? `${name}-erro` : undefined}
-        className={`${BASE} ${erro ? COM_ERRO : ""}`}
+        className="campo"
       >
         <option value="">{vazio}</option>
         {opcoes.map((o) => {
@@ -111,7 +131,7 @@ export function Selecao({
 }
 
 export function GrupoOpcoes({
-  legenda, name, opcoes, tipo, erro, dica, defaultValue,
+  legenda, name, opcoes, tipo, erro, dica, defaultValue, obrigatorio,
 }: {
   legenda: ReactNode;
   name: string;
@@ -120,34 +140,49 @@ export function GrupoOpcoes({
   erro?: string;
   dica?: string;
   defaultValue?: string;
+  obrigatorio?: boolean;
 }) {
   return (
-    <fieldset aria-describedby={erro ? `${name}-erro` : undefined} className="space-y-1">
-      <legend className="text-sm font-medium mb-1">{legenda}</legend>
-      {dica && <p className="text-xs text-gray-500 mb-1">{dica}</p>}
-      {opcoes.map((o) => (
-        <label key={o.value} className="flex items-start gap-2 text-sm py-0.5">
-          <input
-            type={tipo}
-            name={name}
-            value={o.value}
-            defaultChecked={defaultValue === String(o.value)}
-            className="mt-1 h-4 w-4"
-          />
-          <span>{o.label}</span>
-        </label>
-      ))}
+    <fieldset aria-describedby={erro ? `${name}-erro` : undefined} className="space-y-2">
+      <legend className="mb-1 text-sm font-medium">
+        <Rotulo obrigatorio={obrigatorio}>{legenda}</Rotulo>
+      </legend>
+      {dica && <p className="text-xs text-gray-600 dark:text-gray-300">{dica}</p>}
+      <div className="grid gap-2 sm:grid-cols-2">
+        {opcoes.map((o) => (
+          <label key={o.value} className="opcao">
+            <input
+              type={tipo}
+              name={name}
+              value={o.value}
+              defaultChecked={defaultValue === String(o.value)}
+              className="mt-0.5 h-5 w-5 shrink-0 accent-emerald-700"
+            />
+            <span>{o.label}</span>
+          </label>
+        ))}
+      </div>
       <Erro id={`${name}-erro`} mensagem={erro} />
     </fieldset>
   );
 }
 
-export function Marca({ label, name, erro }: { label: string; name: string; erro?: string }) {
+export function Marca({
+  label, name, erro, obrigatorio,
+}: { label: string; name: string; erro?: string; obrigatorio?: boolean }) {
   return (
     <div>
-      <label className="flex items-start gap-2 text-sm">
-        <input type="checkbox" name={name} className="mt-1 h-4 w-4" aria-invalid={erro ? true : undefined} />
-        <span>{label}</span>
+      <label className="opcao">
+        <input
+          type="checkbox"
+          name={name}
+          aria-invalid={erro ? true : undefined}
+          aria-describedby={erro ? `${name}-erro` : undefined}
+          className="mt-0.5 h-5 w-5 shrink-0 accent-emerald-700"
+        />
+        <span>
+          <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>
+        </span>
       </label>
       <Erro id={`${name}-erro`} mensagem={erro} />
     </div>

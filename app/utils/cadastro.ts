@@ -23,6 +23,14 @@ import {
 
 export type Erros = Record<string, string>;
 
+export const TITULOS_ETAPAS = [
+  "Identificação e controle",
+  "Identificação da pessoa",
+  "Situação de rua",
+  "Rede de apoio e renda",
+  "Consentimento e assinaturas",
+];
+
 const TEXTOS = [
   "modalidade_operacao", "forma_coleta", "data_entrevista", "agente", "entrevistador_cpf",
   "uf", "municipio", "distrito", "subdistrito", "setor_censitario", "referencia", "obs",
@@ -84,10 +92,11 @@ function validarMultipla(
   }
 }
 
-export function validarCadastro(v: ValoresCadastro, hoje = new Date()): Erros {
-  const e: Erros = {};
+const ehUf = (s: string) => (UFS as readonly string[]).includes(s);
+const ehSimNao = (s: string) => s === "1" || s === "2";
 
-  // ---- Bloco 1: identificação e controle ----
+// Uma função por etapa do formulário (mesma divisão de CAMPOS_POR_ETAPA).
+function validarControle(v: ValoresCadastro, e: Erros, hoje: Date) {
   if (!naLista(MODALIDADE_OPERACAO, v.modalidade_operacao)) e.modalidade_operacao = "Selecione Inclusão ou Alteração.";
   if (!naLista(FORMA_COLETA, v.forma_coleta)) e.forma_coleta = "Selecione a forma de coleta.";
   const erroData = validarDataEntrevista(v.data_entrevista, hoje);
@@ -99,7 +108,7 @@ export function validarCadastro(v: ValoresCadastro, hoje = new Date()): Erros {
   if (!v.entrevistador_cpf) e.entrevistador_cpf = "Informe o CPF do entrevistador.";
   else if (!validarCpf(v.entrevistador_cpf)) e.entrevistador_cpf = "CPF inválido. Use o formato 000.000.000-00.";
 
-  if (!(UFS as readonly string[]).includes(v.uf)) e.uf = "Selecione a UF.";
+  if (!ehUf(v.uf)) e.uf = "Selecione a UF.";
   if (v.municipio.length < 2 || v.municipio.length > 60) e.municipio = "Informe o município (2 a 60 caracteres).";
   if (v.distrito.length > 60) e.distrito = "Máximo de 60 caracteres.";
   if (v.subdistrito.length > 60) e.subdistrito = "Máximo de 60 caracteres.";
@@ -108,8 +117,9 @@ export function validarCadastro(v: ValoresCadastro, hoje = new Date()): Erros {
   if (v.referencia.length < 3 || v.referencia.length > 100)
     e.referencia = "Informe o equipamento de referência (CRAS, CREAS, abrigo — nunca um domicílio).";
   if (v.obs.length > 500) e.obs = "Máximo de 500 caracteres.";
+}
 
-  // ---- 2.01 a 2.03: identificação da pessoa ----
+function validarPessoa(v: ValoresCadastro, e: Erros) {
   const temDocumento = Boolean(v.cpf || v.rg);
   if (!v.nome) e.nome = "Informe o nome completo.";
   else if (!nomeValido(v.nome) || v.nome.length > NOME_MAX)
@@ -119,50 +129,65 @@ export function validarCadastro(v: ValoresCadastro, hoje = new Date()): Erros {
   if (v.apelido.length > 40) e.apelido = "Máximo de 40 caracteres.";
   if (v.idade && !(/^\d{1,3}$/.test(v.idade) && Number(v.idade) <= 130)) e.idade = "Idade deve estar entre 0 e 130.";
   if (v.cidade_nascimento.length > 60) e.cidade_nascimento = "Máximo de 60 caracteres.";
-  if (v.estado_nascimento && !(UFS as readonly string[]).includes(v.estado_nascimento)) e.estado_nascimento = "UF inválida.";
+  if (v.estado_nascimento && !ehUf(v.estado_nascimento)) e.estado_nascimento = "UF inválida.";
   if (v.estado_civil.length > 30) e.estado_civil = "Máximo de 30 caracteres.";
   if (v.nome_pais.length > 140) e.nome_pais = "Máximo de 140 caracteres.";
   if (v.cpf && !validarCpf(v.cpf)) e.cpf = "CPF inválido. Use o formato 000.000.000-00.";
   if (v.rg && !/^[0-9A-Za-z./ -]{5,20}$/.test(v.rg)) e.rg = "RG inválido (5 a 20 caracteres: letras, números, ponto, hífen ou barra).";
   if (v.nis && !validarNis(v.nis)) e.nis = "NIS/PIS/PASEP inválido. São 11 dígitos, formato 000.00000.00-0.";
   if (v.telefone && !normalizarTelefone(v.telefone)) e.telefone = "Telefone inválido. Use DDD + número: (92) 99999-9999 ou (92) 3333-4444.";
+}
 
-  // ---- 2.04: onde costuma dormir (dias por semana, soma máxima 7) ----
+// 2.04: dias por semana em cada local, soma entre 1 e 7.
+function validarDiasPorSemana(v: ValoresCadastro, e: Erros) {
   let soma = 0;
-  let dormeInvalido = false;
+  let invalido = false;
   for (const l of LOCAIS_DORMIR) {
     const bruto = v[l.campo];
     if (bruto === "") continue;
-    if (!/^[0-7]$/.test(bruto)) dormeInvalido = true;
+    if (!/^[0-7]$/.test(bruto)) invalido = true;
     else soma += Number(bruto);
   }
-  if (dormeInvalido) e.dorme_dias = "Informe de 0 a 7 dias por semana em cada local.";
+  if (invalido) e.dorme_dias = "Informe de 0 a 7 dias por semana em cada local.";
   else if (soma < 1) e.dorme_dias = "Informe em quantos dias por semana a pessoa dorme em ao menos um local.";
   else if (soma > 7) e.dorme_dias = `A soma dos dias por semana não pode passar de 7 (atual: ${soma}).`;
+}
 
+function validarSituacaoDeRua(v: ValoresCadastro, e: Erros) {
+  validarDiasPorSemana(v, e);
   if (!naLista(FAIXAS_TEMPO, v.tempo_rua_faixa)) e.tempo_rua_faixa = "Selecione há quanto tempo vive na rua.";
   if (!naLista(FAIXAS_TEMPO, v.tempo_cidade_faixa)) e.tempo_cidade_faixa = "Selecione há quanto tempo mora na cidade.";
   validarMultipla(e, "motivos", v.motivos, MOTIVOS_RUA, EXCLUSIVOS.motivos);
-  if (!["1", "2"].includes(v.vive_familia_na_rua)) e.vive_familia_na_rua = "Selecione Sim ou Não.";
+  if (!ehSimNao(v.vive_familia_na_rua)) e.vive_familia_na_rua = "Selecione Sim ou Não.";
   if (!naLista(CONTATO_PARENTE, v.contato_parente)) e.contato_parente = "Selecione a frequência de contato.";
   for (const c of ["moradia_anterior", "moradia_atual", "redes_apoio"] as const) {
     if (v[c].length > 200) e[c] = "Máximo de 200 caracteres.";
   }
+}
 
-  // ---- 2.10 a 2.13 ----
+function validarRedeERenda(v: ValoresCadastro, e: Erros) {
   validarMultipla(e, "atividades_comunitarias", v.atividades_comunitarias, ATIVIDADES_COMUNITARIAS, EXCLUSIVOS.atividades_comunitarias);
   validarMultipla(e, "atendimentos_6m", v.atendimentos_6m, LOCAIS_ATENDIMENTO, EXCLUSIVOS.atendimentos_6m);
-  if (!["1", "2"].includes(v.carteira_assinada)) e.carteira_assinada = "Selecione Sim ou Não.";
+  if (!ehSimNao(v.carteira_assinada)) e.carteira_assinada = "Selecione Sim ou Não.";
   validarMultipla(e, "atividades_renda", v.atividades_renda, ATIVIDADES_RENDA, EXCLUSIVOS.atividades_renda);
+}
 
-  // ---- Fechamento ----
+function validarFechamento(v: ValoresCadastro, e: Erros) {
   if (!v.consentimento_lgpd) e.consentimento_lgpd = "É necessário registrar o consentimento da pessoa entrevistada (LGPD).";
   if (!v.assinatura_rf) e.assinatura_rf = "A assinatura do responsável familiar é obrigatória.";
   for (const c of ["assinatura_rf", "assinatura_entrevistador", "assinatura_representante"] as const) {
     const s = v[c];
     if (s && (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(s) || s.length > ASSINATURA_MAX)) e[c] = "Assinatura inválida. Desenhe novamente.";
   }
+}
 
+export function validarCadastro(v: ValoresCadastro, hoje = new Date()): Erros {
+  const e: Erros = {};
+  validarControle(v, e, hoje);
+  validarPessoa(v, e);
+  validarSituacaoDeRua(v, e);
+  validarRedeERenda(v, e);
+  validarFechamento(v, e);
   return e;
 }
 
