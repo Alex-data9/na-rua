@@ -6,7 +6,7 @@ const ATUALIZACAO_LIMITE_MESES = 24; // RF13 — Guia de Cadastramento MDS / Dec
 
 export type NovaPessoa = Omit<
   PessoaRow,
-  "id" | "data_cadastro" | "ultima_atualizacao" | "status"
+  "id" | "codigo_familiar" | "ordem" | "foto_url" | "data_cadastro" | "ultima_atualizacao" | "status"
 > & { status?: StatusAcompanhamento };
 
 export async function criarPessoa(dados: NovaPessoa) {

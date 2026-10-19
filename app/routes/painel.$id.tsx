@@ -8,6 +8,20 @@ import {
   precisaReentrevista,
 } from "~/models/pessoa.server";
 import type { StatusAcompanhamento } from "~/utils/supabase.types";
+import {
+  ATIVIDADES_COMUNITARIAS,
+  ATIVIDADES_RENDA,
+  CONTATO_PARENTE,
+  FAIXAS_TEMPO,
+  FORMA_COLETA,
+  LOCAIS_ATENDIMENTO,
+  LOCAIS_DORMIR,
+  MODALIDADE_OPERACAO,
+  MOTIVOS_RUA,
+  rotulo,
+  rotulos,
+} from "~/utils/formulario-suplementar2";
+import { formatarCpf, formatarNis, formatarTelefone } from "~/utils/validators";
 
 const STATUS_OPCOES: StatusAcompanhamento[] = [
   "novo",
@@ -54,14 +68,56 @@ export default function DetalhesPessoa() {
         )}
       </div>
 
-      <section className="grid grid-cols-2 gap-4 text-sm">
-        <Info label="Referência" valor={pessoa.referencia} />
-        <Info label="Agente" valor={pessoa.agente} />
-        <Info label="Tempo em situação de rua" valor={pessoa.tempo_rua} />
-        <Info label="Onde dorme" valor={pessoa.dorme} />
-        <Info label="Contato com família" valor={pessoa.contato_familia} />
-        <Info label="NIS" valor={pessoa.nis} />
-      </section>
+      <Secao titulo="Identificação e controle">
+        <Info label="Código familiar" valor={String(pessoa.codigo_familiar)} />
+        <Info label="Modalidade" valor={rotulo(MODALIDADE_OPERACAO, pessoa.modalidade_operacao)} />
+        <Info label="Data da entrevista" valor={new Date(`${pessoa.data_entrevista}T12:00:00`).toLocaleDateString("pt-BR")} />
+        <Info label="Forma de coleta" valor={rotulo(FORMA_COLETA, pessoa.forma_coleta)} />
+        <Info label="Entrevistador" valor={pessoa.agente} />
+        <Info label="CPF do entrevistador" valor={formatarCpf(pessoa.entrevistador_cpf)} />
+        <Info label="Município/UF" valor={[pessoa.municipio, pessoa.uf].filter(Boolean).join(" / ") || null} />
+        <Info label="Equipamento de referência" valor={pessoa.referencia} />
+        <Info label="Observações" valor={pessoa.obs} />
+      </Secao>
+
+      <Secao titulo="Pessoa">
+        <Info label="CPF" valor={formatarCpf(pessoa.cpf)} />
+        <Info label="RG" valor={pessoa.rg} />
+        <Info label="NIS/PIS/PASEP" valor={formatarNis(pessoa.nis)} />
+        <Info label="Telefone" valor={formatarTelefone(pessoa.telefone)} />
+        <Info label="Idade" valor={pessoa.idade?.toString() ?? null} />
+        <Info label="Naturalidade" valor={[pessoa.cidade_nascimento, pessoa.estado_nascimento].filter(Boolean).join(" / ") || null} />
+      </Secao>
+
+      <Secao titulo="Situação de rua">
+        <Info
+          label="Onde costuma dormir (dias por semana)"
+          valor={
+            LOCAIS_DORMIR.filter((l) => pessoa[l.campo] != null)
+              .map((l) => `${l.label}: ${pessoa[l.campo]}`)
+              .join(" · ") || null
+          }
+        />
+        <Info label="Tempo na rua" valor={rotulo(FAIXAS_TEMPO, pessoa.tempo_rua_faixa)} />
+        <Info label="Motivos" valor={rotulos(MOTIVOS_RUA, pessoa.motivos).join("; ") || null} />
+        <Info label="Tempo na cidade" valor={rotulo(FAIXAS_TEMPO, pessoa.tempo_cidade_faixa)} />
+        <Info label="Vive com a família na rua" valor={simNao(pessoa.vive_familia_na_rua)} />
+        <Info label="Contato com parente fora da rua" valor={rotulo(CONTATO_PARENTE, pessoa.contato_parente)} />
+        <Info label="Atividade comunitária (6 meses)" valor={rotulos(ATIVIDADES_COMUNITARIAS, pessoa.atividades_comunitarias).join("; ") || null} />
+        <Info label="Atendido em (6 meses)" valor={rotulos(LOCAIS_ATENDIMENTO, pessoa.atendimentos_6m).join("; ") || null} />
+        <Info label="Já teve carteira assinada" valor={simNao(pessoa.carteira_assinada)} />
+        <Info label="Atividades de renda" valor={rotulos(ATIVIDADES_RENDA, pessoa.atividades_renda).join("; ") || null} />
+        <Info label="Onde morava antes" valor={pessoa.moradia_anterior} />
+        <Info label="Onde mora atualmente" valor={pessoa.moradia_atual} />
+        <Info label="Redes de apoio" valor={pessoa.redes_apoio} />
+      </Secao>
+
+      {pessoa.assinatura_rf && (
+        <section>
+          <h2 className="font-medium mb-2">Assinatura do responsável familiar</h2>
+          <img src={pessoa.assinatura_rf} alt="Assinatura do responsável familiar" className="h-24 rounded border bg-white" />
+        </section>
+      )}
 
       <Form method="post" className="flex items-center gap-3">
         <input type="hidden" name="intent" value="status" />
@@ -114,6 +170,17 @@ export default function DetalhesPessoa() {
         </ul>
       </section>
     </main>
+  );
+}
+
+const simNao = (v: boolean | null) => (v == null ? null : v ? "Sim" : "Não");
+
+function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="font-medium mb-2">{titulo}</h2>
+      <div className="grid grid-cols-2 gap-4 text-sm">{children}</div>
+    </section>
   );
 }
 
