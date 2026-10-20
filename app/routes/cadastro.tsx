@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Form, redirect, useActionData, useBlocker, useNavigation } from "react-router";
 import type { Route } from "./+types/cadastro";
 import { criarPessoa } from "~/models/pessoa.server";
+import { salvarFoto } from "~/models/foto.server";
+import { ehJpegDeVerdade } from "~/utils/foto";
+import { FotoPessoa } from "~/components/FotoPessoa";
 import { ProgressBar } from "~/components/ProgressBar";
 import { Campo, GrupoOpcoes, Linha, Marca, Selecao } from "~/components/campos";
 import { DiasPorSemana } from "~/components/DiasPorSemana";
@@ -24,7 +27,7 @@ import {
   TITULOS_ETAPAS,
   lerFormulario,
   normalizarCadastro,
-  validarCadastro,
+  validarFormulario,
   type Erros,
 } from "~/utils/cadastro";
 import { dataLocalIso, mascaraCpf, mascaraNis, mascaraTelefone } from "~/utils/validators";
@@ -40,13 +43,24 @@ const SIM_NAO = [
 ];
 
 export async function action({ request }: Route.ActionArgs) {
-  const valores = lerFormulario(await request.formData());
-  const erros = validarCadastro(valores);
+  const form = await request.formData();
+  const erros = validarFormulario(form);
+  const foto = form.get("foto");
+  const temFoto = foto instanceof File && foto.size > 0;
+  if (!erros.foto && temFoto && !(await ehJpegDeVerdade(foto))) erros.foto = "A foto precisa ser uma imagem JPEG.";
   if (Object.keys(erros).length > 0) return { erros, erro: null };
 
   try {
-    const pessoa = await criarPessoa(normalizarCadastro(valores));
-    return redirect(`/painel/${pessoa.id}?criado=1`);
+    const pessoa = await criarPessoa(normalizarCadastro(lerFormulario(form)));
+    let fotoSalva = true;
+    if (temFoto) {
+      try {
+        await salvarFoto(pessoa.id, foto);
+      } catch {
+        fotoSalva = false; // o cadastro já foi gravado; a ficha avisa que a foto não foi
+      }
+    }
+    return redirect(`/painel/${pessoa.id}?criado=1${fotoSalva ? "" : "&foto=falhou"}`);
   } catch (err) {
     return { erros: {} as Erros, erro: err instanceof Error ? err.message : "Erro ao salvar cadastro." };
   }
@@ -120,7 +134,7 @@ export default function Cadastro() {
   }
 
   function validarTudo() {
-    return validarCadastro(lerFormulario(new FormData(formRef.current!)));
+    return validarFormulario(new FormData(formRef.current!));
   }
 
   function proximo() {
@@ -200,6 +214,7 @@ export default function Cadastro() {
         <Form
           ref={formRef}
           method="post"
+          encType="multipart/form-data"
           noValidate
           onBlur={aoSair}
           onInput={() => setPreenchido(true)}
@@ -220,7 +235,7 @@ export default function Cadastro() {
               <Campo label="1.11 Nome completo do entrevistador" name="agente" autoComplete="name" obrigatorio maxLength={70}
                 erro={erros.agente} />
               <Campo label="1.12 CPF do entrevistador" name="entrevistador_cpf" inputMode="numeric" mascara={mascaraCpf}
-                placeholder="000.000.000-00" maxLength={14} obrigatorio erro={erros.entrevistador_cpf} />
+                placeholder="000.000.000-00" obrigatorio erro={erros.entrevistador_cpf} />
             </Linha>
             <Linha>
               <Selecao label="1.02 UF" name="uf" opcoes={UFS} obrigatorio erro={erros.uf} />
@@ -256,15 +271,15 @@ export default function Cadastro() {
             </Linha>
             <Linha>
               <Campo label="CPF" name="cpf" inputMode="numeric" mascara={mascaraCpf} placeholder="000.000.000-00"
-                maxLength={14} erro={erros.cpf} />
+                erro={erros.cpf} />
               <Campo label="RG" name="rg" maxLength={20} erro={erros.rg} />
             </Linha>
             <Linha>
               <Campo label="2.03 NIS/PIS/PASEP" name="nis" inputMode="numeric" mascara={mascaraNis}
-                placeholder="000.00000.00-0" maxLength={14} dica="Opcional; deixe em branco se a pessoa não tiver."
+                placeholder="000.00000.00-0" dica="Opcional; deixe em branco se a pessoa não tiver."
                 erro={erros.nis} />
               <Campo label="Telefone de contato (com DDD)" name="telefone" type="tel" inputMode="tel" mascara={mascaraTelefone}
-                placeholder="(92) 99999-9999" maxLength={15}
+                placeholder="(92) 99999-9999"
                 dica="Opcional. Pode ser de familiar, vizinho ou de um equipamento de assistência social."
                 erro={erros.telefone} />
             </Linha>
@@ -313,6 +328,7 @@ export default function Cadastro() {
             <Marca name="consentimento_lgpd" erro={erros.consentimento_lgpd} obrigatorio
               label="A pessoa entrevistada consentiu com o uso destes dados (LGPD)" />
             <Marca name="campanha_pop_rua" label="Vincular à Campanha Pop Rua" />
+            <FotoPessoa erro={erros.foto} />
             <p className="border-l-2 border-linha pl-3 text-xs text-gray-600 dark:border-gray-700 dark:text-gray-400">
               Declaro, sob as penas da lei (Art. 299 do Código Penal), que as declarações deste formulário correspondem à
               verdade e comprometo-me a procurar a gestão municipal para atualizá-las sempre que houver mudanças ou, no

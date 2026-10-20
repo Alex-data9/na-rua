@@ -12,6 +12,7 @@ import {
   UFS,
   type Opcao,
 } from "./formulario-suplementar2";
+import { validarFoto } from "./foto";
 import {
   normalizarTelefone,
   nomeValido,
@@ -64,7 +65,7 @@ export const CAMPOS_POR_ETAPA: string[][] = [
   ["dorme_dias", "tempo_rua_faixa", "tempo_cidade_faixa", "motivos", "vive_familia_na_rua",
     "contato_parente", "moradia_anterior", "moradia_atual", "redes_apoio"],
   ["atividades_comunitarias", "atendimentos_6m", "carteira_assinada", "atividades_renda"],
-  ["consentimento_lgpd", "assinatura_rf", "assinatura_entrevistador", "assinatura_representante"],
+  ["consentimento_lgpd", "foto", "assinatura_rf", "assinatura_entrevistador", "assinatura_representante"],
 ];
 
 const NOME_MAX = 70;
@@ -188,6 +189,14 @@ export function validarCadastro(v: ValoresCadastro, hoje = new Date()): Erros {
   validarSituacaoDeRua(v, e);
   validarRedeERenda(v, e);
   validarFechamento(v, e);
+  return e;
+}
+
+// Valida o formulário inteiro (campos de texto + foto opcional). Usada no navegador e no servidor.
+export function validarFormulario(form: FormData, hoje = new Date()): Erros {
+  const e = validarCadastro(lerFormulario(form), hoje);
+  const erroFoto = validarFoto(form.get("foto"));
+  if (erroFoto) e.foto = erroFoto;
   return e;
 }
 

@@ -63,8 +63,16 @@ export function normalizarTelefone(valor: string) {
   return d;
 }
 
+// Colar "+55 92 99123-4567" ou "5592991234567" não pode virar um número errado: tira o código do país.
+function semCodigoDoPais(valor: string) {
+  const d = soDigitos(valor);
+  const comMais = valor.trim().startsWith("+55");
+  const colado = (d.length === 12 || d.length === 13) && d.startsWith("55"); // DDD+número nunca passa de 11 dígitos
+  return comMais || colado ? d.slice(2) : d;
+}
+
 export function mascaraTelefone(valor: string) {
-  const d = soDigitos(valor).slice(0, 11);
+  const d = semCodigoDoPais(valor).slice(0, 11);
   if (d.length <= 2) return d.length ? `(${d}` : "";
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;

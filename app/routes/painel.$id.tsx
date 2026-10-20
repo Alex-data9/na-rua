@@ -1,5 +1,6 @@
 import { Form, Link, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
 import { Alerta } from "~/components/Alerta";
+import { urlDaFoto } from "~/models/foto.server";
 import { Botao, Seta } from "~/components/Botao";
 import { StatusEtiqueta } from "~/components/StatusEtiqueta";
 import { Rotulo } from "~/components/campos";
@@ -35,7 +36,8 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ params }: Route.LoaderArgs) {
   const pessoa = await obterPessoa(params.id!);
   const notas = await listarNotas(params.id!);
-  return { pessoa, notas, reentrevista: precisaReentrevista(pessoa) };
+  const fotoUrl = await urlDaFoto(pessoa.foto_url);
+  return { pessoa, notas, fotoUrl, reentrevista: precisaReentrevista(pessoa) };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -56,7 +58,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function DetalhesPessoa() {
-  const { pessoa, notas, reentrevista } = useLoaderData<typeof loader>();
+  const { pessoa, notas, fotoUrl, reentrevista } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const [searchParams] = useSearchParams();
@@ -78,6 +80,9 @@ export default function DetalhesPessoa() {
         {pessoa.apelido && <p className="font-mono text-sm text-gray-600 dark:text-gray-400">“{pessoa.apelido}”</p>}
         {searchParams.get("criado") === "1" && !actionData && (
           <Alerta tipo="sucesso">Cadastro concluído com sucesso. Esta é a ficha da pessoa cadastrada.</Alerta>
+        )}
+        {searchParams.get("foto") === "falhou" && !actionData && (
+          <Alerta tipo="erro">O cadastro foi salvo, mas não foi possível guardar a foto. Ela não ficou registrada.</Alerta>
         )}
         {actionData?.intent === "status" && <Alerta tipo="sucesso">Status atualizado.</Alerta>}
         {actionData?.intent === "nota" && <Alerta tipo="sucesso">Anotação adicionada.</Alerta>}
@@ -129,6 +134,13 @@ export default function DetalhesPessoa() {
         <Info label="Onde mora atualmente" valor={pessoa.moradia_atual} />
         <Info label="Redes de apoio" valor={pessoa.redes_apoio} />
       </Secao>
+
+      {fotoUrl && (
+        <section className="cartao">
+          <h2 className="titulo-display mb-4 text-xl">Foto</h2>
+          <img src={fotoUrl} alt={`Foto de ${pessoa.nome}`} className="h-56 w-56 border border-linha object-cover" />
+        </section>
+      )}
 
       {pessoa.assinatura_rf && (
         <section className="cartao">

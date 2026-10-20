@@ -33,6 +33,11 @@ npm install
 3. Copie `.env.example` para `.env` e preencha `SUPABASE_URL` e
    `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API).
 
+### Foto da pessoa (opcional)
+
+A migration `0003_bucket_fotos.sql` cria o bucket **privado** `fotos` (só JPEG, até 2 MB). O navegador reduz e converte a
+imagem para JPEG; o servidor revalida e grava `<id da pessoa>.jpg`, e a ficha mostra a foto por link assinado de 5 minutos.
+
 ### Desenvolvimento
 
 ```bash
