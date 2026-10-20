@@ -57,10 +57,10 @@ export async function action({ request }: Route.ActionArgs) {
       try {
         await salvarFoto(pessoa.id, foto);
       } catch {
-        fotoSalva = false; // o cadastro já foi gravado; a ficha avisa que a foto não foi
+        fotoSalva = false; // o cadastro já foi gravado; a página de confirmação avisa que a foto não foi
       }
     }
-    return redirect(`/painel/${pessoa.id}?criado=1${fotoSalva ? "" : "&foto=falhou"}`);
+    return redirect(`/cadastro/concluido?codigo=${pessoa.codigo_familiar}${fotoSalva ? "" : "&foto=falhou"}`);
   } catch (err) {
     return { erros: {} as Erros, erro: err instanceof Error ? err.message : "Erro ao salvar cadastro." };
   }

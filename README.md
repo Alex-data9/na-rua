@@ -38,6 +38,22 @@ npm install
 A migration `0003_bucket_fotos.sql` cria o bucket **privado** `fotos` (só JPEG, até 2 MB). O navegador reduz e converte a
 imagem para JPEG; o servidor revalida e grava `<id da pessoa>.jpg`, e a ficha mostra a foto por link assinado de 5 minutos.
 
+### Acesso de administrador
+
+O cadastro (`/cadastro`) é aberto a todos. O painel (`/painel`), as fichas e a exclusão de cadastros exigem login de
+administrador (`/login`). A autenticação é o Supabase Auth: o servidor valida o token a cada requisição e só aceita
+usuários com `app_metadata.role = "admin"` (campo que o usuário comum não consegue alterar). Não há auto-cadastro.
+
+Para criar um administrador (a senha é digitada no terminal, sem aparecer na tela):
+
+```bash
+npm run criar-admin -- email@exemplo.com
+```
+
+Se o e-mail já existir no Supabase, o script o promove a administrador e atualiza a senha. A migration
+`0004_somente_servidor.sql` remove as políticas que davam acesso direto às tabelas a qualquer usuário autenticado: só o
+servidor (chave de serviço) lê e grava os dados.
+
 ### Desenvolvimento
 
 ```bash
@@ -80,7 +96,6 @@ npm run build
   (`dorme`, `tempo_rua`, `motivo`, `contato_familia`, `renda`, `documentos`) depois do deploy.
 - Formulário Principal do Cadastro Único (nome, data de nascimento, escolaridade, renda etc.) e lista de
   componentes da família (Bloco 3), citada na questão 2.08.
-- Autenticação (Supabase Auth) e controle de acesso por profissional (RNF03).
 - Upload de foto para reconhecimento (RF01b) via Supabase Storage, com
   consentimento explícito antes de produção.
 - Fluxo de solicitação de busca por familiares via ONG/órgão validador (RF10).

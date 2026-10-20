@@ -23,3 +23,9 @@ export async function urlDaFoto(caminho: string | null) {
   const { data, error } = await getSupabaseClient().storage.from(BUCKET).createSignedUrl(caminho, VALIDADE_URL_SEGUNDOS);
   return error ? null : data.signedUrl;
 }
+
+// Remove o arquivo do bucket. Devolve false se não foi possível (o chamador avisa o administrador).
+export async function removerFoto(caminho: string) {
+  const { error } = await getSupabaseClient().storage.from(BUCKET).remove([caminho]);
+  return !error;
+}

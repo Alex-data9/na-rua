@@ -3,14 +3,17 @@ import { Botao, Seta, classeBotao } from "~/components/Botao";
 import type { Route } from "./+types/painel._index";
 import { listarPessoas, obterIndicadores } from "~/models/pessoa.server";
 import { STATUS_ROTULO } from "~/utils/status";
+import { exigirAdmin } from "~/utils/sessao.server";
+import { Alerta } from "~/components/Alerta";
 import { StatusEtiqueta } from "~/components/StatusEtiqueta";
 import type { StatusAcompanhamento } from "~/utils/supabase.types";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Painel de acompanhamento — NaRua" }];
+  return [{ title: "Painel de acompanhamento — NaRua" }, { name: "robots", content: "noindex" }];
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
+  await exigirAdmin(request);
   const url = new URL(request.url);
   const nome = url.searchParams.get("nome") ?? undefined;
   const status = (url.searchParams.get("status") as StatusAcompanhamento) || undefined;
@@ -39,6 +42,17 @@ export default function Painel() {
           Novo cadastro <Seta />
         </Link>
       </div>
+
+      {searchParams.get("excluido") === "1" && (
+        <div className="mb-6 space-y-3">
+          <Alerta tipo="sucesso">Cadastro excluído.</Alerta>
+          {searchParams.get("foto") === "falhou" && (
+            <Alerta tipo="erro">
+              A foto não pôde ser removida do armazenamento. Remova o arquivo manualmente no Supabase (Storage → fotos).
+            </Alerta>
+          )}
+        </div>
+      )}
 
       <section aria-label="Indicadores" className="mb-10 grid grid-cols-2 border-t border-l border-tinta md:grid-cols-4 dark:border-gray-700">
         <Indicador numero="01" label="Total cadastrados" valor={indicadores.totalCadastrados} />

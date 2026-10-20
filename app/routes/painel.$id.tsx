@@ -1,4 +1,4 @@
-import { Form, Link, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
+import { Form, Link, redirect, useActionData, useLoaderData, useNavigation } from "react-router";
 import { Alerta } from "~/components/Alerta";
 import { urlDaFoto } from "~/models/foto.server";
 import { Botao, Seta } from "~/components/Botao";
@@ -8,11 +8,14 @@ import type { Route } from "./+types/painel.$id";
 import {
   adicionarNota,
   atualizarStatusPessoa,
+  excluirPessoa,
   listarNotas,
   obterPessoa,
   precisaReentrevista,
 } from "~/models/pessoa.server";
 import { STATUS_OPCOES, STATUS_ROTULO } from "~/utils/status";
+import { exigirAdmin } from "~/utils/sessao.server";
+import { ExcluirCadastro } from "~/components/ExcluirCadastro";
 import type { StatusAcompanhamento } from "~/utils/supabase.types";
 import {
   ATIVIDADES_COMUNITARIAS,
@@ -30,19 +33,28 @@ import {
 import { formatarCpf, formatarNis, formatarTelefone } from "~/utils/validators";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Ficha de acompanhamento — NaRua" }];
+  return [{ title: "Ficha de acompanhamento — NaRua" }, { name: "robots", content: "noindex" }];
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
-  const pessoa = await obterPessoa(params.id!);
+export async function loader({ request, params }: Route.LoaderArgs) {
+  await exigirAdmin(request);
+  const pessoa = await obterPessoa(params.id!).catch(() => {
+    throw new Response("Cadastro não encontrado.", { status: 404 }); // ex.: já foi excluído
+  });
   const notas = await listarNotas(params.id!);
   const fotoUrl = await urlDaFoto(pessoa.foto_url);
   return { pessoa, notas, fotoUrl, reentrevista: precisaReentrevista(pessoa) };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
+  await exigirAdmin(request);
   const form = await request.formData();
   const intent = form.get("intent");
+
+  if (intent === "excluir") {
+    const { fotoRemovida } = await excluirPessoa(params.id!);
+    return redirect(`/painel?excluido=1${fotoRemovida ? "" : "&foto=falhou"}`);
+  }
 
   if (intent === "status") {
     await atualizarStatusPessoa(params.id!, form.get("status") as StatusAcompanhamento);
@@ -61,7 +73,6 @@ export default function DetalhesPessoa() {
   const { pessoa, notas, fotoUrl, reentrevista } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const [searchParams] = useSearchParams();
   const intencao = navigation.state === "submitting" ? String(navigation.formData?.get("intent")) : null;
 
   return (
@@ -78,12 +89,6 @@ export default function DetalhesPessoa() {
           {pessoa.nome}<span className="text-sinal-500">.</span>
         </h1>
         {pessoa.apelido && <p className="font-mono text-sm text-gray-600 dark:text-gray-400">“{pessoa.apelido}”</p>}
-        {searchParams.get("criado") === "1" && !actionData && (
-          <Alerta tipo="sucesso">Cadastro concluído com sucesso. Esta é a ficha da pessoa cadastrada.</Alerta>
-        )}
-        {searchParams.get("foto") === "falhou" && !actionData && (
-          <Alerta tipo="erro">O cadastro foi salvo, mas não foi possível guardar a foto. Ela não ficou registrada.</Alerta>
-        )}
         {actionData?.intent === "status" && <Alerta tipo="sucesso">Status atualizado.</Alerta>}
         {actionData?.intent === "nota" && <Alerta tipo="sucesso">Anotação adicionada.</Alerta>}
         {reentrevista && (
@@ -204,6 +209,8 @@ export default function DetalhesPessoa() {
           )}
         </ul>
       </section>
+
+      <ExcluirCadastro nome={pessoa.nome} excluindo={intencao === "excluir"} />
     </main>
   );
 }

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { Opcao } from "~/utils/formulario-suplementar2";
 import { IconeAlerta } from "./Alerta";
 
@@ -46,15 +46,17 @@ interface CampoProps {
   placeholder?: string;
   min?: number;
   max?: number;
+  defaultValue?: string;
 }
 
 export function Campo({
   label, name, erro, dica, type = "text", obrigatorio, textarea, mascara, inputMode, maxLength,
-  autoComplete = "off", placeholder, min, max,
+  autoComplete = "off", placeholder, min, max, defaultValue,
 }: CampoProps) {
   const comum = {
     name,
     id: name,
+    defaultValue,
     maxLength,
     placeholder,
     autoComplete,
@@ -85,6 +87,45 @@ export function Campo({
           {dica}
         </p>
       )}
+      <Erro id={`${name}-erro`} mensagem={erro} />
+    </div>
+  );
+}
+
+// Senha com botão de mostrar/ocultar (o botão é focável e anuncia o estado para leitores de tela).
+export function CampoSenha({
+  label, name, erro, autoComplete = "current-password", autoFocus,
+}: { label: string; name: string; erro?: string; autoComplete?: string; autoFocus?: boolean }) {
+  const [visivel, setVisivel] = useState(false);
+  return (
+    <div>
+      <label htmlFor={name} className="mb-1.5 block text-sm font-semibold">
+        <Rotulo obrigatorio>{label}</Rotulo>
+      </label>
+      <div className="flex">
+        <input
+          id={name}
+          name={name}
+          type={visivel ? "text" : "password"}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
+          autoCapitalize="none"
+          spellCheck={false}
+          aria-required
+          aria-invalid={erro ? true : undefined}
+          aria-describedby={erro ? `${name}-erro` : undefined}
+          className="campo min-w-0 flex-1"
+        />
+        <button
+          type="button"
+          aria-pressed={visivel}
+          onClick={() => setVisivel((v) => !v)}
+          className="min-h-11 shrink-0 border border-l-0 border-gray-500 px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] hover:bg-gray-100 dark:border-gray-500 dark:hover:bg-gray-800"
+        >
+          {visivel ? "Ocultar" : "Mostrar"}
+          <span className="sr-only"> senha</span>
+        </button>
+      </div>
       <Erro id={`${name}-erro`} mensagem={erro} />
     </div>
   );

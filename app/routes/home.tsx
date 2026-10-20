@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-import { Link } from "react-router";
+import { Link, useRouteLoaderData } from "react-router";
 import { Seta, classeBotao } from "~/components/Botao";
 import { TITULOS_ETAPAS } from "~/utils/cadastro";
 
@@ -22,12 +22,13 @@ const PASSOS = [
   <>Preencha as {TITULOS_ETAPAS.length} etapas, na ordem do Formulário Suplementar 2.</>,
   <>Registre o consentimento da pessoa entrevistada e a assinatura do responsável familiar, que são obrigatórios.</>,
   <>
-    Conclua o cadastro e siga para a ficha da pessoa, onde você atualiza o status de acompanhamento e adiciona
-    anotações.
+    Conclua o cadastro. Os dados são gravados e você recebe a confirmação. A consulta e o acompanhamento dos cadastros
+    ficam com os administradores.
   </>,
 ];
 
 export default function Home() {
+  const admin = useRouteLoaderData<{ admin: boolean }>("root")?.admin ?? false;
   return (
     <main className="mx-auto max-w-6xl px-4">
       {/* Abertura */}
@@ -47,8 +48,8 @@ export default function Home() {
             <Link to="/cadastro" className={classeBotao("primario")}>
               Novo cadastro <Seta />
             </Link>
-            <Link to="/painel" className={classeBotao("secundario")}>
-              Painel de acompanhamento
+            <Link to={admin ? "/painel" : "/login"} className={classeBotao("secundario")}>
+              {admin ? "Painel de acompanhamento" : "Acesso restrito"}
             </Link>
           </div>
         </div>
@@ -89,10 +90,14 @@ export default function Home() {
             texto={`Registre uma pessoa em ${TITULOS_ETAPAS.length} etapas, seguindo o Formulário Suplementar 2 do Cadastro Único.`}
           />
           <AcessoRapido
-            to="/painel"
+            to={admin ? "/painel" : "/login"}
             numero="B"
-            titulo="Painel de acompanhamento"
-            texto="Veja os indicadores, busque cadastros por nome ou situação e registre anotações de acompanhamento."
+            titulo={admin ? "Painel de acompanhamento" : "Acesso restrito"}
+            texto={
+              admin
+                ? "Veja os indicadores, busque cadastros por nome ou situação, registre anotações e exclua cadastros."
+                : "Área dos administradores: consulta, acompanhamento e exclusão de cadastros. Entre para acessar."
+            }
           />
         </ul>
       </section>

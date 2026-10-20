@@ -1,22 +1,23 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation, useNavigation } from "react-router";
+import { Form, Link, NavLink, useLocation, useNavigation, useRouteLoaderData } from "react-router";
 import { Logo } from "./Logo";
 
 // Só rotas que existem de fato. Acrescentar aqui quando houver novas páginas.
-const ITENS_NAVEGACAO = [
+const ITENS_PUBLICOS = [
   { to: "/", rotulo: "Início", end: true },
   { to: "/cadastro", rotulo: "Novo cadastro", end: false },
-  { to: "/painel", rotulo: "Painel", end: false },
 ] as const;
+const ITEM_ADMIN = { to: "/painel", rotulo: "Painel", end: false } as const;
 
 const ITEM = "flex min-h-11 items-center gap-2 px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] transition-colors";
 const ITEM_ATIVO = "text-tinta dark:text-white";
 const ITEM_INATIVO = "text-gray-600 hover:text-tinta dark:text-gray-400 dark:hover:text-white";
 
-function ListaNavegacao({ className }: { className: string }) {
+function ListaNavegacao({ className, admin }: { className: string; admin: boolean }) {
+  const itens = admin ? [...ITENS_PUBLICOS, ITEM_ADMIN] : ITENS_PUBLICOS;
   return (
     <ul className={className}>
-      {ITENS_NAVEGACAO.map((i, n) => (
+      {itens.map((i, n) => (
         <li key={i.to}>
           <NavLink to={i.to} end={i.end} className={({ isActive }) => `${ITEM} ${isActive ? ITEM_ATIVO : ITEM_INATIVO}`}>
             {({ isActive }) => (
@@ -29,6 +30,25 @@ function ListaNavegacao({ className }: { className: string }) {
           </NavLink>
         </li>
       ))}
+      <li>
+        {admin ? (
+          <Form method="post" action="/sair">
+            <button type="submit" className={`${ITEM} ${ITEM_INATIVO}`}>
+              <span aria-hidden="true" className="h-2 w-2" />
+              Sair
+            </button>
+          </Form>
+        ) : (
+          <NavLink to="/login" className={({ isActive }) => `${ITEM} ${isActive ? ITEM_ATIVO : ITEM_INATIVO}`}>
+            {({ isActive }) => (
+              <>
+                <span aria-hidden="true" className={`h-2 w-2 ${isActive ? "bg-sinal-500" : "bg-transparent"}`} />
+                Entrar
+              </>
+            )}
+          </NavLink>
+        )}
+      </li>
     </ul>
   );
 }
@@ -37,6 +57,7 @@ export function Cabecalho() {
   const [aberto, setAberto] = useState(false);
   const { pathname } = useLocation();
   const carregando = useNavigation().state === "loading";
+  const admin = useRouteLoaderData<{ admin: boolean }>("root")?.admin ?? false;
   const botao = useRef<HTMLButtonElement>(null);
 
   useEffect(() => setAberto(false), [pathname]);
@@ -75,7 +96,7 @@ export function Cabecalho() {
         </Link>
 
         <nav aria-label="Navegação principal" className="hidden md:block">
-          <ListaNavegacao className="flex gap-1" />
+          <ListaNavegacao className="flex gap-1" admin={admin} />
         </nav>
 
         <button
@@ -92,7 +113,7 @@ export function Cabecalho() {
 
       {aberto && (
         <nav id="menu-movel" aria-label="Navegação principal" className="border-t border-linha px-4 py-2 md:hidden dark:border-gray-800">
-          <ListaNavegacao className="flex flex-col gap-1" />
+          <ListaNavegacao className="flex flex-col gap-1" admin={admin} />
         </nav>
       )}
     </header>

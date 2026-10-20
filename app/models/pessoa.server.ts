@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "~/utils/supabase.server";
+import { removerFoto } from "./foto.server";
 import type { NotaRow, PessoaRow, StatusAcompanhamento } from "~/utils/supabase.types";
 
 const DIA_MS = 24 * 60 * 60 * 1000;
@@ -126,4 +127,17 @@ export async function obterIndicadores() {
 export function precisaReentrevista(pessoa: PessoaRow) {
   const limite = ATUALIZACAO_LIMITE_MESES * 30 * DIA_MS;
   return Date.now() - new Date(pessoa.ultima_atualizacao).getTime() > limite;
+}
+
+// Apaga o cadastro (as anotações saem junto, por cascata) e a foto. A exclusão do cadastro não depende da foto:
+// se o arquivo não puder ser removido, devolve fotoRemovida=false para o administrador ser avisado.
+export async function excluirPessoa(id: string) {
+  const supabase = getSupabaseClient();
+  const { data: pessoa } = await supabase.from("pessoa").select("foto_url").eq("id", id).maybeSingle();
+
+  const { error } = await supabase.from("pessoa").delete().eq("id", id);
+  if (error) throw new Error(`Falha ao excluir cadastro: ${error.message}`);
+
+  const caminho = (pessoa as { foto_url: string | null } | null)?.foto_url;
+  return { fotoRemovida: caminho ? await removerFoto(caminho) : true };
 }

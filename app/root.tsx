@@ -1,4 +1,5 @@
 import {
+  data,
   isRouteErrorResponse,
   Link,
   Links,
@@ -13,6 +14,7 @@ import "./app.css";
 import { Cabecalho } from "./components/Cabecalho";
 import { Rodape } from "./components/Rodape";
 import { classeBotao } from "./components/Botao";
+import { obterSessao } from "./utils/sessao.server";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -27,6 +29,12 @@ export const links: Route.LinksFunction = () => [
   },
   { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
 ];
+
+// O cabeçalho precisa saber se há administrador logado (mostra Painel/Sair ou Entrar). Nada além disso vai ao navegador.
+export async function loader({ request }: Route.LoaderArgs) {
+  const { admin, setCookie } = await obterSessao(request);
+  return data({ admin: Boolean(admin) }, setCookie ? { headers: { "Set-Cookie": setCookie } } : undefined);
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
