@@ -1,6 +1,7 @@
 import { Form, Link, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
 import { Alerta } from "~/components/Alerta";
-import { Botao } from "~/components/Botao";
+import { Botao, Seta } from "~/components/Botao";
+import { StatusEtiqueta } from "~/components/StatusEtiqueta";
 import { Rotulo } from "~/components/campos";
 import type { Route } from "./+types/painel.$id";
 import {
@@ -62,13 +63,19 @@ export default function DetalhesPessoa() {
   const intencao = navigation.state === "submitting" ? String(navigation.formData?.get("intent")) : null;
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 py-6 md:py-10">
-      <Link to="/painel" className="inline-flex min-h-11 items-center text-sm underline">
-        ← Voltar ao painel
+    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 md:py-12">
+      <Link to="/painel" className="rotulo-tecnico inline-flex min-h-11 items-center gap-2 hover:!text-tinta dark:hover:!text-white">
+        <Seta className="h-4 w-4 rotate-180" /> Voltar ao painel
       </Link>
-      <div className="space-y-3">
-        <h1 className="text-2xl font-semibold md:text-3xl">{pessoa.nome}</h1>
-        {pessoa.apelido && <p className="text-gray-700 dark:text-gray-300">"{pessoa.apelido}"</p>}
+      <div className="space-y-4 border-b border-tinta pb-6 dark:border-gray-700">
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="rotulo-tecnico">Ficha N° {String(pessoa.codigo_familiar)}</p>
+          <StatusEtiqueta status={pessoa.status} />
+        </div>
+        <h1 className="titulo-display text-4xl leading-none md:text-6xl">
+          {pessoa.nome}<span className="text-sinal-500">.</span>
+        </h1>
+        {pessoa.apelido && <p className="font-mono text-sm text-gray-600 dark:text-gray-400">“{pessoa.apelido}”</p>}
         {searchParams.get("criado") === "1" && !actionData && (
           <Alerta tipo="sucesso">Cadastro concluído com sucesso. Esta é a ficha da pessoa cadastrada.</Alerta>
         )}
@@ -125,13 +132,13 @@ export default function DetalhesPessoa() {
 
       {pessoa.assinatura_rf && (
         <section className="cartao">
-          <h2 className="mb-3 text-lg font-semibold">Assinatura do responsável familiar</h2>
-          <img src={pessoa.assinatura_rf} alt="Assinatura do responsável familiar" className="h-24 rounded-lg border border-gray-300 bg-white" />
+          <h2 className="titulo-display mb-4 text-xl">Assinatura do responsável familiar</h2>
+          <img src={pessoa.assinatura_rf} alt="Assinatura do responsável familiar" className="h-24 border border-linha bg-white" />
         </section>
       )}
 
       <section className="cartao">
-        <h2 className="mb-3 text-lg font-semibold">Status de acompanhamento</h2>
+        <h2 className="titulo-display mb-4 text-xl">Status de acompanhamento</h2>
         <Form method="post" className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <input type="hidden" name="intent" value="status" />
           <div className="sm:w-64">
@@ -151,7 +158,7 @@ export default function DetalhesPessoa() {
       </section>
 
       <section className="cartao">
-        <h2 className="mb-3 text-lg font-semibold">Histórico de anotações</h2>
+        <h2 className="titulo-display mb-4 text-xl">Histórico de anotações</h2>
         <Form method="post" key={notas.length} className="mb-5 space-y-4">
           <input type="hidden" name="intent" value="nota" />
           <div>
@@ -173,9 +180,9 @@ export default function DetalhesPessoa() {
 
         <ul className="space-y-3">
           {notas.map((n) => (
-            <li key={n.id} className="rounded-lg border border-gray-200 p-3 text-sm dark:border-gray-700">
+            <li key={n.id} className="border-l-2 border-sinal-500 bg-papel p-3 text-sm dark:bg-[#0b0b0b]">
               <p className="whitespace-pre-line break-words">{n.texto}</p>
-              <p className="mt-1 text-gray-700 dark:text-gray-300">
+              <p className="mt-2 font-mono text-[11px] tracking-[0.08em] uppercase text-gray-600 dark:text-gray-400">
                 {n.autor} — {new Date(n.ts).toLocaleString("pt-BR")}
               </p>
             </li>
@@ -194,17 +201,17 @@ const simNao = (v: boolean | null) => (v == null ? null : v ? "Sim" : "Não");
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="cartao">
-      <h2 className="mb-4 text-lg font-semibold">{titulo}</h2>
-      <dl className="grid gap-4 text-sm sm:grid-cols-2">{children}</dl>
+      <h2 className="titulo-display mb-5 text-xl">{titulo}</h2>
+      <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">{children}</dl>
     </section>
   );
 }
 
 function Info({ label, valor }: { label: string; valor: string | null }) {
   return (
-    <div className="min-w-0">
-      <dt className="text-gray-700 dark:text-gray-300">{label}</dt>
-      <dd className="break-words font-medium">{valor || "—"}</dd>
+    <div className="min-w-0 border-t border-linha pt-2 dark:border-gray-800">
+      <dt className="font-mono text-[11px] tracking-[0.1em] uppercase text-gray-600 dark:text-gray-400">{label}</dt>
+      <dd className="mt-1 break-words font-medium">{valor || "—"}</dd>
     </div>
   );
 }

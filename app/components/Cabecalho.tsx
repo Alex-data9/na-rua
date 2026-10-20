@@ -1,24 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigation } from "react-router";
+import { Logo } from "./Logo";
 
 // Só rotas que existem de fato. Acrescentar aqui quando houver novas páginas.
 const ITENS_NAVEGACAO = [
   { to: "/", rotulo: "Início", end: true },
   { to: "/cadastro", rotulo: "Novo cadastro", end: false },
-  { to: "/painel", rotulo: "Painel de acompanhamento", end: false },
+  { to: "/painel", rotulo: "Painel", end: false },
 ] as const;
 
-const ITEM = "flex min-h-11 items-center rounded px-3 text-sm font-medium border-b-2 transition-colors";
-const ITEM_ATIVO = "border-emerald-600 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100";
-const ITEM_INATIVO = "border-transparent text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800";
+const ITEM = "flex min-h-11 items-center gap-2 px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] transition-colors";
+const ITEM_ATIVO = "text-tinta dark:text-white";
+const ITEM_INATIVO = "text-gray-600 hover:text-tinta dark:text-gray-400 dark:hover:text-white";
 
 function ListaNavegacao({ className }: { className: string }) {
   return (
     <ul className={className}>
-      {ITENS_NAVEGACAO.map((i) => (
+      {ITENS_NAVEGACAO.map((i, n) => (
         <li key={i.to}>
           <NavLink to={i.to} end={i.end} className={({ isActive }) => `${ITEM} ${isActive ? ITEM_ATIVO : ITEM_INATIVO}`}>
-            {i.rotulo}
+            {({ isActive }) => (
+              <>
+                <span aria-hidden="true" className={`h-2 w-2 ${isActive ? "bg-sinal-500" : "bg-transparent"}`} />
+                <span aria-hidden="true" className="text-gray-400">0{n + 1}</span>
+                {i.rotulo}
+              </>
+            )}
           </NavLink>
         </li>
       ))}
@@ -47,7 +54,7 @@ export function Cabecalho() {
   }, [aberto]);
 
   return (
-    <header className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
+    <header className="sticky top-0 z-40 border-b border-tinta bg-papel/90 backdrop-blur dark:border-gray-700 dark:bg-[#0b0b0b]/90">
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-gray-900"
@@ -58,17 +65,13 @@ export function Cabecalho() {
         {carregando && (
           <>
             <span className="sr-only">Carregando página…</span>
-            <div className="h-1 w-full animate-pulse bg-emerald-600" />
+            <div className="h-1 w-full animate-pulse bg-sinal-500" />
           </>
         )}
       </div>
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-2">
-        <Link to="/" className="flex min-h-11 items-center gap-2 rounded" aria-label="NaRua — ir para a página inicial">
-          <span aria-hidden="true" className="text-xl">🏙️</span>
-          <span className="leading-tight">
-            <span className="block text-lg font-semibold">NaRua</span>
-            <span className="block text-xs text-gray-600 dark:text-gray-300">Cadastro e acompanhamento</span>
-          </span>
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2">
+        <Link to="/" className="flex min-h-11 items-center" aria-label="NaRua — ir para a página inicial">
+          <Logo />
         </Link>
 
         <nav aria-label="Navegação principal" className="hidden md:block">
@@ -78,7 +81,7 @@ export function Cabecalho() {
         <button
           ref={botao}
           type="button"
-          className="flex min-h-11 items-center rounded border border-gray-300 px-3 text-sm font-medium md:hidden dark:border-gray-700"
+          className="flex min-h-11 items-center border border-tinta px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] md:hidden dark:border-gray-300"
           aria-expanded={aberto}
           aria-controls="menu-movel"
           onClick={() => setAberto((a) => !a)}
@@ -88,7 +91,7 @@ export function Cabecalho() {
       </div>
 
       {aberto && (
-        <nav id="menu-movel" aria-label="Navegação principal" className="border-t border-gray-200 px-4 py-2 md:hidden dark:border-gray-800">
+        <nav id="menu-movel" aria-label="Navegação principal" className="border-t border-linha px-4 py-2 md:hidden dark:border-gray-800">
           <ListaNavegacao className="flex flex-col gap-1" />
         </nav>
       )}

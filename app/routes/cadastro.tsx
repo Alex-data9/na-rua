@@ -6,7 +6,7 @@ import { ProgressBar } from "~/components/ProgressBar";
 import { Campo, GrupoOpcoes, Linha, Marca, Selecao } from "~/components/campos";
 import { DiasPorSemana } from "~/components/DiasPorSemana";
 import { Alerta } from "~/components/Alerta";
-import { Botao } from "~/components/Botao";
+import { Botao, Seta } from "~/components/Botao";
 import { SignaturePad } from "~/components/SignaturePad";
 import {
   ATIVIDADES_COMUNITARIAS,
@@ -173,12 +173,13 @@ export default function Cadastro() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 md:py-10">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold md:text-3xl">Novo cadastro</h1>
-        <p className="mt-1 text-sm text-gray-700 dark:text-gray-200">
+    <main className="mx-auto max-w-3xl px-4 py-8 md:py-12">
+      <div className="mb-8 border-b border-tinta pb-6 dark:border-gray-700">
+        <p className="rotulo-tecnico mb-3">Formulário Suplementar 2 — Cadastro Único</p>
+        <h1 className="titulo-display text-4xl md:text-5xl">Novo cadastro<span className="text-sinal-500">.</span></h1>
+        <p className="mt-3 text-sm text-gray-700 dark:text-gray-300">
           Pessoa em situação de rua — Formulário Suplementar 2 do Cadastro Único (MDS). Campos marcados com{" "}
-          <span aria-hidden="true" className="text-red-700 dark:text-red-300">*</span>
+          <span aria-hidden="true" className="text-sinal-700 dark:text-sinal-500">*</span>
           <span className="sr-only">asterisco</span> são obrigatórios.
         </p>
       </div>
@@ -191,8 +192,9 @@ export default function Cadastro() {
           <Alerta tipo="erro">Corrija os campos destacados para continuar.</Alerta>
         )}
 
-        <h2 ref={tituloEtapa} tabIndex={-1} className="text-xl font-semibold outline-offset-4">
-          {step}. {TITULOS_ETAPAS[step - 1]}
+        <h2 ref={tituloEtapa} tabIndex={-1} className="flex items-baseline gap-3 outline-offset-4">
+          <span className="font-mono text-sm font-semibold text-sinal-700 dark:text-sinal-500">{String(step).padStart(2, "0")}</span>
+          <span className="titulo-display text-2xl md:text-3xl">{TITULOS_ETAPAS[step - 1]}</span>
         </h2>
 
         <Form
@@ -311,7 +313,7 @@ export default function Cadastro() {
             <Marca name="consentimento_lgpd" erro={erros.consentimento_lgpd} obrigatorio
               label="A pessoa entrevistada consentiu com o uso destes dados (LGPD)" />
             <Marca name="campanha_pop_rua" label="Vincular à Campanha Pop Rua" />
-            <p className="text-xs text-gray-600 dark:text-gray-300">
+            <p className="border-l-2 border-linha pl-3 text-xs text-gray-600 dark:border-gray-700 dark:text-gray-400">
               Declaro, sob as penas da lei (Art. 299 do Código Penal), que as declarações deste formulário correspondem à
               verdade e comprometo-me a procurar a gestão municipal para atualizá-las sempre que houver mudanças ou, no
               máximo, em até dois anos da data desta entrevista.
@@ -323,17 +325,17 @@ export default function Cadastro() {
               erro={erros.assinatura_representante} />
           </fieldset>
 
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-between dark:border-gray-800">
+          <div className="flex flex-col-reverse gap-3 border-t border-tinta pt-5 sm:flex-row sm:justify-between dark:border-gray-700">
             <Botao variante="secundario" className="w-full sm:w-auto" disabled={step === 1 || isSubmitting}
               onClick={() => setStep((s) => Math.max(1, s - 1))}>
               Voltar
             </Botao>
             {step < TOTAL_STEPS ? (
               <Botao className="w-full sm:w-auto" onClick={proximo}>
-                Próximo
+                Próximo <Seta />
               </Botao>
             ) : (
-              <Botao type="submit" className="w-full sm:w-auto" carregando={isSubmitting} textoCarregando="Salvando...">
+              <Botao type="submit" variante="destaque" className="w-full sm:w-auto" carregando={isSubmitting} textoCarregando="Salvando...">
                 Concluir cadastro
               </Botao>
             )}

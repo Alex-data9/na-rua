@@ -51,7 +51,7 @@ export function SignaturePad({
 
   return (
     <div>
-      <p className="mb-1.5 text-sm font-medium">
+      <p className="mb-1.5 text-sm font-semibold">
         <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>
       </p>
       <canvas
@@ -60,14 +60,14 @@ export function SignaturePad({
         height={180}
         role="img"
         aria-label={`Área para desenhar: ${label}`}
-        className={`w-full touch-none rounded-lg border bg-white ${erro ? "border-red-600" : "border-gray-500"}`}
+        className={`w-full touch-none border bg-white bg-[linear-gradient(to_bottom,transparent_75%,#d6d4cf_75%,#d6d4cf_calc(75%+1px),transparent_calc(75%+1px))] ${erro ? "border-sinal-600" : "border-gray-400 dark:border-gray-600"}`}
         onPointerDown={iniciar}
         onPointerMove={mover}
         onPointerUp={terminar}
         onPointerCancel={terminar}
       />
       <input type="hidden" name={name} value={valor} />
-      <button type="button" onClick={limpar} className="mt-1 inline-flex min-h-11 items-center text-sm underline">
+      <button type="button" onClick={limpar} className="link mt-1 inline-flex min-h-11 items-center text-sm">
         Limpar assinatura
       </button>
       <Erro id={`${name}-erro`} mensagem={erro} />

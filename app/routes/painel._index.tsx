@@ -1,8 +1,9 @@
 import { Form, Link, useLoaderData, useNavigation, useSearchParams } from "react-router";
-import { Botao, classeBotao } from "~/components/Botao";
+import { Botao, Seta, classeBotao } from "~/components/Botao";
 import type { Route } from "./+types/painel._index";
 import { listarPessoas, obterIndicadores } from "~/models/pessoa.server";
 import { STATUS_ROTULO } from "~/utils/status";
+import { StatusEtiqueta } from "~/components/StatusEtiqueta";
 import type { StatusAcompanhamento } from "~/utils/supabase.types";
 
 export function meta({}: Route.MetaArgs) {
@@ -28,26 +29,25 @@ export default function Painel() {
   const carregando = useNavigation().state !== "idle";
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 md:py-10">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold md:text-3xl">Painel de acompanhamento</h1>
+    <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-tinta pb-6 dark:border-gray-700">
+        <div>
+          <p className="rotulo-tecnico mb-3">Acompanhamento</p>
+          <h1 className="titulo-display text-4xl md:text-5xl">Painel<span className="text-sinal-500">.</span></h1>
+        </div>
         <Link to="/cadastro" className={classeBotao("primario")}>
-          Novo cadastro
+          Novo cadastro <Seta />
         </Link>
       </div>
 
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Indicador label="Total cadastrados" valor={indicadores.totalCadastrados} />
-        <Indicador label="Novos na semana" valor={indicadores.novosNaSemana} />
-        <Indicador label="Buscas familiares ativas" valor={indicadores.buscasFamiliaresAtivas} />
-        <Indicador
-          label="Sem atualização há 30+ dias"
-          valor={indicadores.semAtualizacao30Dias}
-          alerta
-        />
+      <section aria-label="Indicadores" className="mb-10 grid grid-cols-2 border-t border-l border-tinta md:grid-cols-4 dark:border-gray-700">
+        <Indicador numero="01" label="Total cadastrados" valor={indicadores.totalCadastrados} />
+        <Indicador numero="02" label="Novos na semana" valor={indicadores.novosNaSemana} />
+        <Indicador numero="03" label="Buscas familiares ativas" valor={indicadores.buscasFamiliaresAtivas} />
+        <Indicador numero="04" label="Sem atualização há 30+ dias" valor={indicadores.semAtualizacao30Dias} alerta />
       </section>
 
-      <Form method="get" role="search" aria-label="Buscar cadastros" className="mb-4 flex flex-col gap-3 sm:flex-row">
+      <Form method="get" role="search" aria-label="Buscar cadastros" className="mb-6 flex flex-col gap-3 sm:flex-row">
         <input
           type="search"
           name="nome"
@@ -74,22 +74,33 @@ export default function Painel() {
         </Botao>
       </Form>
 
-      <ul className="cartao divide-y divide-gray-200 p-0 dark:divide-gray-800">
-        {pessoas.map((p) => (
-          <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 p-4">
-            <div className="min-w-0">
-              <Link to={`/painel/${p.id}`} className="inline-flex min-h-11 items-center font-medium hover:underline">
-                {p.nome}
-              </Link>
-              <p className="break-words text-sm text-gray-700 dark:text-gray-300">{p.referencia}</p>
-            </div>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">
-              {STATUS_ROTULO[p.status]}
-            </span>
+      <div className="rotulo-tecnico hidden grid-cols-[3rem_1fr_12rem_2rem] gap-4 border-b border-tinta px-2 pb-2 sm:grid dark:border-gray-700">
+        <span>N°</span>
+        <span>Pessoa / referência</span>
+        <span>Status</span>
+        <span />
+      </div>
+      <ul className="divide-y divide-linha border-b border-linha dark:divide-gray-800 dark:border-gray-800">
+        {pessoas.map((p, i) => (
+          <li key={p.id}>
+            <Link
+              to={`/painel/${p.id}`}
+              className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 px-2 py-4 transition-colors hover:bg-white sm:grid-cols-[3rem_1fr_12rem_2rem] dark:hover:bg-[#151515]"
+            >
+              <span className="hidden font-mono text-xs text-gray-500 sm:block">{String(i + 1).padStart(3, "0")}</span>
+              <span className="min-w-0">
+                <span className="block font-semibold group-hover:underline group-hover:decoration-sinal-500 group-hover:decoration-2 group-hover:underline-offset-4">
+                  {p.nome}
+                </span>
+                <span className="block break-words text-sm text-gray-600 dark:text-gray-400">{p.referencia}</span>
+              </span>
+              <StatusEtiqueta status={p.status} />
+              <Seta className="hidden h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-sinal-500 sm:block" />
+            </Link>
           </li>
         ))}
         {pessoas.length === 0 && (
-          <li className="p-4 text-gray-700 dark:text-gray-300">Nenhum cadastro encontrado.</li>
+          <li className="px-2 py-8 text-gray-600 dark:text-gray-400">Nenhum cadastro encontrado.</li>
         )}
       </ul>
     </main>
@@ -97,20 +108,28 @@ export default function Painel() {
 }
 
 function Indicador({
+  numero,
   label,
   valor,
   alerta,
 }: {
+  numero: string;
   label: string;
   valor: number;
   alerta?: boolean;
 }) {
+  const destaque = alerta && valor > 0;
   return (
-    <div className="cartao p-4">
-      <p className="text-sm text-gray-700 dark:text-gray-300">{label}</p>
-      <p className={`text-3xl font-semibold ${alerta && valor > 0 ? "text-red-700 dark:text-red-300" : ""}`}>
-        {valor}
+    <div
+      className={`flex min-h-36 flex-col justify-between gap-4 border-r border-b border-tinta p-4 md:p-5 dark:border-gray-700 ${
+        destaque ? "bg-sinal-500 text-tinta" : "bg-white dark:bg-[#121212]"
+      }`}
+    >
+      <p className="flex justify-between gap-2 font-mono text-[11px] font-medium tracking-[0.12em] uppercase">
+        <span>{label}</span>
+        <span className={destaque ? "" : "text-gray-500"}>{numero}</span>
       </p>
+      <p className="titulo-display text-5xl md:text-6xl">{valor}</p>
     </div>
   );
 }

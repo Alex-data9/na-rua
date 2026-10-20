@@ -5,7 +5,7 @@ import { IconeAlerta } from "./Alerta";
 export function Erro({ id, mensagem }: { id: string; mensagem?: string }) {
   if (!mensagem) return null;
   return (
-    <p id={id} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-red-700 dark:text-red-300">
+    <p id={id} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-sinal-700 dark:text-sinal-500">
       <IconeAlerta tipo="erro" className="mt-0.5 h-4 w-4 shrink-0" />
       <span>{mensagem}</span>
     </p>
@@ -18,7 +18,7 @@ export function Rotulo({ children, obrigatorio }: { children: ReactNode; obrigat
       {children}
       {obrigatorio && (
         <>
-          <span aria-hidden="true" className="text-red-700 dark:text-red-300"> *</span>
+          <span aria-hidden="true" className="text-sinal-700 dark:text-sinal-500"> *</span>
           <span className="sr-only"> (obrigatório)</span>
         </>
       )}
@@ -65,7 +65,7 @@ export function Campo({
   };
   return (
     <div>
-      <label htmlFor={name} className="mb-1.5 block text-sm font-medium">
+      <label htmlFor={name} className="mb-1.5 block text-sm font-semibold">
         <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>
       </label>
       {textarea ? (
@@ -103,7 +103,7 @@ export function Selecao({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="mb-1.5 block text-sm font-medium">
+      <label htmlFor={name} className="mb-1.5 block text-sm font-semibold">
         <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>
       </label>
       <select
@@ -144,7 +144,7 @@ export function GrupoOpcoes({
 }) {
   return (
     <fieldset aria-describedby={erro ? `${name}-erro` : undefined} className="space-y-2">
-      <legend className="mb-1 text-sm font-medium">
+      <legend className="mb-1 text-sm font-semibold">
         <Rotulo obrigatorio={obrigatorio}>{legenda}</Rotulo>
       </legend>
       {dica && <p className="text-xs text-gray-600 dark:text-gray-300">{dica}</p>}
@@ -156,7 +156,7 @@ export function GrupoOpcoes({
               name={name}
               value={o.value}
               defaultChecked={defaultValue === String(o.value)}
-              className="mt-0.5 h-5 w-5 shrink-0 accent-emerald-700"
+              className="mt-0.5 h-5 w-5 shrink-0 accent-sinal-500"
             />
             <span>{o.label}</span>
           </label>
@@ -178,7 +178,7 @@ export function Marca({
           name={name}
           aria-invalid={erro ? true : undefined}
           aria-describedby={erro ? `${name}-erro` : undefined}
-          className="mt-0.5 h-5 w-5 shrink-0 accent-emerald-700"
+          className="mt-0.5 h-5 w-5 shrink-0 accent-sinal-500"
         />
         <span>
           <Rotulo obrigatorio={obrigatorio}>{label}</Rotulo>

@@ -1,10 +1,20 @@
 import type { ButtonHTMLAttributes } from "react";
 
-export type VarianteBotao = "primario" | "secundario";
+export type VarianteBotao = "primario" | "secundario" | "destaque";
 
 // Também serve para <Link>: <Link className={classeBotao("primario")}>.
 export const classeBotao = (variante: VarianteBotao = "primario", extra = "") =>
   `btn btn-${variante} ${extra}`.trim();
+
+// Seta de direção usada em botões e links ("seguir").
+export function Seta({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25"
+      strokeLinecap="square" className={className}>
+      <path d="M4 12h15m-6-6 6 6-6 6" />
+    </svg>
+  );
+}
 
 export function Spinner() {
   return (

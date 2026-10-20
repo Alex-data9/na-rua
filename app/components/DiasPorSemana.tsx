@@ -12,7 +12,7 @@ export function DiasPorSemana({ erro }: { erro?: string }) {
 
   return (
     <fieldset aria-describedby={erro ? "dorme_dias-erro" : undefined}>
-      <legend className="mb-1 text-sm font-medium">
+      <legend className="mb-1 text-sm font-semibold">
         <Rotulo obrigatorio>2.04 Onde costuma dormir? Quantas vezes por semana?</Rotulo>
       </legend>
       <p className="mb-3 text-xs text-gray-600 dark:text-gray-300">
@@ -32,7 +32,7 @@ export function DiasPorSemana({ erro }: { erro?: string }) {
           </label>
         ))}
       </div>
-      <p className={`mt-2 text-sm ${soma > MAXIMO_DIAS ? "text-red-700 dark:text-red-300" : "text-gray-600 dark:text-gray-300"}`}>
+      <p className={`mt-2 text-sm ${soma > MAXIMO_DIAS ? "text-sinal-700 dark:text-sinal-500" : "text-gray-600 dark:text-gray-300"}`}>
         Total: {soma} de {MAXIMO_DIAS} dias
       </p>
       <Erro id="dorme_dias-erro" mensagem={erro} />
