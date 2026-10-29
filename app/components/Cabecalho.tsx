@@ -22,7 +22,7 @@ function ListaNavegacao({ className, admin }: { className: string; admin: boolea
           <NavLink to={i.to} end={i.end} className={({ isActive }) => `${ITEM} ${isActive ? ITEM_ATIVO : ITEM_INATIVO}`}>
             {({ isActive }) => (
               <>
-                <span aria-hidden="true" className={`h-2 w-2 ${isActive ? "bg-sinal-500" : "bg-transparent"}`} />
+                <span aria-hidden="true" className={`h-2 w-2 ${isActive ? "bg-poste-500" : "bg-transparent"}`} />
                 <span aria-hidden="true" className="text-gray-400">0{n + 1}</span>
                 {i.rotulo}
               </>
@@ -42,7 +42,7 @@ function ListaNavegacao({ className, admin }: { className: string; admin: boolea
           <NavLink to="/login" className={({ isActive }) => `${ITEM} ${isActive ? ITEM_ATIVO : ITEM_INATIVO}`}>
             {({ isActive }) => (
               <>
-                <span aria-hidden="true" className={`h-2 w-2 ${isActive ? "bg-sinal-500" : "bg-transparent"}`} />
+                <span aria-hidden="true" className={`h-2 w-2 ${isActive ? "bg-poste-500" : "bg-transparent"}`} />
                 Entrar
               </>
             )}
@@ -75,7 +75,7 @@ export function Cabecalho() {
   }, [aberto]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-tinta bg-papel/90 backdrop-blur dark:border-gray-700 dark:bg-[#0b0b0b]/90">
+    <header className="sticky top-0 z-40 border-b border-tinta bg-papel/90 backdrop-blur dark:border-gray-700 dark:bg-noite/90">
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-gray-900"
@@ -86,7 +86,7 @@ export function Cabecalho() {
         {carregando && (
           <>
             <span className="sr-only">Carregando página…</span>
-            <div className="h-1 w-full animate-pulse bg-sinal-500" />
+            <div className="h-1 w-full animate-pulse bg-poste-500" />
           </>
         )}
       </div>

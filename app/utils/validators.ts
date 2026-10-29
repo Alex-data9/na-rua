@@ -1,3 +1,5 @@
+import { doisDigitos } from "./numeros";
+
 // Validadores e máscaras de formato — usados no navegador (feedback imediato) e no servidor (decisão final).
 // Valores são sempre guardados "limpos" (só dígitos) e exibidos com máscara.
 
@@ -94,8 +96,7 @@ export const nomeValido = (s: string) => NOME_VALIDO.test(s);
 // ---------- Datas ----------
 // Data local no formato AAAA-MM-DD (o mesmo valor de <input type="date">).
 export function dataLocalIso(data = new Date()) {
-  const dois = (n: number) => String(n).padStart(2, "0");
-  return `${data.getFullYear()}-${dois(data.getMonth() + 1)}-${dois(data.getDate())}`;
+  return `${data.getFullYear()}-${doisDigitos(data.getMonth() + 1)}-${doisDigitos(data.getDate())}`;
 }
 
 // Não pode ser futura nem anterior a 2000.

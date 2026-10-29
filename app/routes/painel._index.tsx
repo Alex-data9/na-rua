@@ -36,7 +36,7 @@ export default function Painel() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-tinta pb-6 dark:border-gray-700">
         <div>
           <p className="rotulo-tecnico mb-3">Acompanhamento</p>
-          <h1 className="titulo-display text-4xl md:text-5xl">Painel<span className="text-sinal-500">.</span></h1>
+          <h1 className="titulo-display text-4xl md:text-5xl">Painel<span aria-hidden="true" className="text-poste-500">.</span></h1>
         </div>
         <Link to="/cadastro" className={classeBotao("primario")}>
           Novo cadastro <Seta />
@@ -103,13 +103,13 @@ export default function Painel() {
             >
               <span className="hidden font-mono text-xs text-gray-500 sm:block">{String(i + 1).padStart(3, "0")}</span>
               <span className="min-w-0">
-                <span className="block font-semibold group-hover:underline group-hover:decoration-sinal-500 group-hover:decoration-2 group-hover:underline-offset-4">
+                <span className="block font-semibold group-hover:underline group-hover:decoration-poste-500 group-hover:decoration-2 group-hover:underline-offset-4">
                   {p.nome}
                 </span>
                 <span className="block break-words text-sm text-gray-600 dark:text-gray-400">{p.referencia}</span>
               </span>
               <StatusEtiqueta status={p.status} />
-              <Seta className="hidden h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-sinal-500 sm:block" />
+              <Seta className="hidden h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-poste-600 sm:block" />
             </Link>
           </li>
         ))}
@@ -136,7 +136,7 @@ function Indicador({
   return (
     <div
       className={`flex min-h-36 flex-col justify-between gap-4 border-r border-b border-tinta p-4 md:p-5 dark:border-gray-700 ${
-        destaque ? "bg-sinal-500 text-tinta" : "bg-white dark:bg-[#121212]"
+        destaque ? "bg-poste-400 text-tinta" : "bg-white dark:bg-noite-superficie"
       }`}
     >
       <p className="flex justify-between gap-2 font-mono text-[11px] font-medium tracking-[0.12em] uppercase">

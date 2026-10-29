@@ -32,7 +32,7 @@ export function DiasPorSemana({ erro }: { erro?: string }) {
           </label>
         ))}
       </div>
-      <p className={`mt-2 text-sm ${soma > MAXIMO_DIAS ? "text-sinal-700 dark:text-sinal-500" : "text-gray-600 dark:text-gray-300"}`}>
+      <p className={`mt-2 text-sm ${soma > MAXIMO_DIAS ? "text-sinal-700 dark:text-sinal-300" : "text-gray-600 dark:text-gray-300"}`}>
         Total: {soma} de {MAXIMO_DIAS} dias
       </p>
       <Erro id="dorme_dias-erro" mensagem={erro} />

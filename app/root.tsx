@@ -25,7 +25,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400..700&family=Big+Shoulders:opsz,wght@10..72,700..900&family=Overpass+Mono:wght@400..700&display=swap",
   },
   { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
 ];
@@ -81,7 +81,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return (
     <main className="mx-auto max-w-6xl space-y-4 px-4 py-16">
       <p className="rotulo-tecnico">Erro</p>
-      <h1 className="titulo-display text-4xl md:text-6xl">{message}<span className="text-sinal-500">.</span></h1>
+      <h1 className="titulo-display text-4xl md:text-6xl">{message}<span aria-hidden="true" className="text-poste-500">.</span></h1>
       <p>{details}</p>
       <Link to="/" className={classeBotao("primario")}>
         Voltar para o início

@@ -39,10 +39,18 @@ export default function Login() {
   const enviando = useNavigation().state === "submitting";
 
   return (
-    <main className="mx-auto max-w-md px-4 py-10 md:py-16">
-      <p className="rotulo-tecnico mb-3">Acesso restrito</p>
+    <main className="malha-ruas-clara">
+      <div className="mx-auto max-w-md px-4 py-10 md:py-16">
+      {/* placa de regulamentação: sinaliza a área restrita */}
+      <p className="mb-5 inline-flex items-center gap-2 rounded-[6px] bg-asfalto-800 px-3 py-2 font-mono text-[11px] font-bold tracking-[0.14em] text-white uppercase shadow-[inset_0_0_0_2px_rgb(255_255_255/0.85)]">
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="3" y="7" width="10" height="7" rx="1" />
+          <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+        </svg>
+        Acesso restrito
+      </p>
       <h1 className="titulo-display mb-2 text-4xl">
-        Entrar<span className="text-sinal-500">.</span>
+        Entrar<span aria-hidden="true" className="text-poste-500">.</span>
       </h1>
       <p className="mb-6 text-gray-700 dark:text-gray-300">
         Área para administradores: consulta, acompanhamento e exclusão de cadastros. O cadastro de pessoas é aberto a
@@ -64,6 +72,7 @@ export default function Login() {
       <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
         Sem acesso? As contas são criadas pela administração do sistema.
       </p>
+      </div>
     </main>
   );
 }

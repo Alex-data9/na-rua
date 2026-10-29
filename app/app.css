@@ -1,27 +1,74 @@
 @import "tailwindcss";
 
-/* Sistema visual "NaRua" — estética editorial/laboratório: papel cinza-claro, tinta preta, blocos em
-   vermelho-sinal, cantos retos, linhas finas e rótulos técnicos em mono. Ajuste os tokens aqui para mudar
-   todas as telas de uma vez.
-   Contraste (WCAG AA): texto branco sobre sinal-600 = 4,7:1; texto sinal-700 sobre branco = 6,4:1;
-   texto preto sobre sinal-500 = 5,7:1. sinal-500 é só para blocos/decoração, nunca texto sobre branco. */
+/* Sistema visual "NaRua — cidade": asfalto azul-grafite como cor dominante, âmbar de poste de luz como acento,
+   off-white de faixa de pedestre no fundo, verde de placa de rua para navegação e vermelho-tijolo só para erro
+   e ação destrutiva. Tipografia: Big Shoulders (letreiro condensado), Atkinson Hyperlegible Next (texto e
+   formulários, legível ao sol) e Overpass Mono (rótulos, derivada da Highway Gothic das placas).
+
+   Contraste (WCAG AA), medido sobre o fundo em que cada cor é usada:
+   - tinta (asfalto-900) sobre papel: 14,6:1        - branco sobre placa-600: 6,5:1
+   - tinta sobre poste-400 (botão âmbar): 10:1       - branco sobre sinal-600 (tijolo): 6,4:1
+   - poste-800 sobre papel (texto âmbar): 6,3:1      - sinal-700 sobre branco (erro): 8,5:1
+   - poste-400 sobre asfalto (acento no escuro): 9:1 - sinal-300 sobre noite (erro no escuro): 7,9:1
+   poste-500/600 em fundo claro é só decoração (nunca texto). */
 @theme {
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-display: "Archivo", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Big Shoulders", "Big Shoulders Display", "Arial Narrow", ui-sans-serif, sans-serif;
+  --font-mono: "Overpass Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --color-papel: #f2f1ee;
-  --color-tinta: #0e0e0e;
-  --color-linha: #d6d4cf;
-  --color-sinal-50: #fff1ec;
-  --color-sinal-100: #ffdccf;
-  --color-sinal-500: #ff4a1c;
-  --color-sinal-600: #d9360f;
-  --color-sinal-700: #b42b0a;
-  --color-sinal-950: #2a0c04;
+  /* Asfalto: a cor dominante (superfícies escuras, texto, linhas fortes) */
+  --color-asfalto-950: #0d1317;
+  --color-asfalto-900: #17212a;
+  --color-asfalto-800: #1f2c37;
+  --color-asfalto-700: #2c3d4b;
+  --color-asfalto-600: #3d5163;
+  --color-asfalto-400: #7d8f9e;
+  --color-asfalto-200: #c5ced5;
 
-  --shadow-cartao: 0 1px 0 rgb(14 14 14 / 0.04);
+  /* Nomes semânticos usados nos componentes */
+  --color-tinta: #17212a;
+  --color-papel: #f3f0e6; /* off-white de faixa de pedestre */
+  --color-caderno: #fbfaf5; /* folha de caderneta (cartões, campos) */
+  --color-linha: #d5cfbf;
+  --color-noite: #0d1317; /* fundo do modo noturno */
+  --color-noite-superficie: #151e25;
+  --color-noite-campo: #1b2630;
+
+  /* Âmbar de poste de luz: acento */
+  --color-poste-100: #fff1cf;
+  --color-poste-300: #ffd27a;
+  --color-poste-400: #ffbe3d;
+  --color-poste-500: #f5a300;
+  --color-poste-600: #c98200;
+  --color-poste-800: #7a4e00;
+
+  /* Verde de placa de rua: navegação, estações concluídas */
+  --color-placa-50: #e3f1ea;
+  --color-placa-500: #13845f;
+  --color-placa-600: #0c6b4e;
+  --color-placa-700: #08553e;
+
+  /* Vermelho-tijolo: erro e ação destrutiva (pontual) */
+  --color-sinal-50: #fbeae5;
+  --color-sinal-100: #f6d3c8;
+  --color-sinal-300: #f0a08c;
+  --color-sinal-500: #c4472b;
+  --color-sinal-600: #a8391f;
+  --color-sinal-700: #8a2d17;
+  --color-sinal-950: #2a0f08;
+
+  --shadow-cartao: 0 1px 0 rgb(23 33 42 / 0.05);
+  --shadow-poste: 0 -18px 40px -12px rgb(255 190 61 / 0.55);
+}
+
+/* Foco: azul de placa no claro, âmbar de poste no escuro (contraste ≥ 3:1 com o fundo nos dois temas) */
+:root {
+  --cor-foco: #1d5fa8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cor-foco: var(--color-poste-400);
+  }
 }
 
 a:focus-visible,
@@ -31,13 +78,14 @@ select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--color-sinal-500);
+  outline: 3px solid var(--cor-foco);
   outline-offset: 2px;
 }
 
 html,
 body {
-  @apply bg-papel text-tinta antialiased dark:bg-[#0b0b0b] dark:text-gray-100;
+  @apply bg-papel text-tinta antialiased dark:bg-noite dark:text-gray-100;
+  font-optical-sizing: auto;
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
@@ -45,72 +93,302 @@ body {
 }
 
 ::selection {
-  @apply bg-sinal-500 text-tinta;
+  @apply bg-poste-300 text-tinta;
 }
 
 @layer components {
-  /* Títulos em Archivo expandido, o "peso" da identidade */
+  /* Títulos: letreiro condensado */
   .titulo-display {
-    @apply font-display font-extrabold tracking-tight font-stretch-semi-expanded;
+    @apply font-display font-extrabold uppercase leading-[0.98] tracking-[0.01em]; /* folga para acentos de maiúsculas */
   }
 
-  /* Rótulo técnico: mono, caixa-alta, espaçado (ex.: "01 — CADASTRO") */
+  /* Rótulo técnico: mono de placa, caixa-alta, espaçado (ex.: "02 — ACESSO RÁPIDO") */
   .rotulo-tecnico {
-    @apply font-mono text-[11px] font-medium tracking-[0.14em] uppercase text-gray-600 dark:text-gray-400;
+    @apply font-mono text-[11px] font-semibold tracking-[0.14em] uppercase text-asfalto-600 dark:text-asfalto-200;
   }
 
   /* Campos de texto, número, data, seleção e área de texto */
   .campo {
-    @apply block min-h-12 w-full rounded-none border border-gray-400 bg-white px-3 py-2 text-base text-tinta placeholder:text-gray-500 hover:border-tinta focus:border-tinta disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 aria-invalid:border-sinal-600 aria-invalid:bg-sinal-50 dark:border-gray-600 dark:bg-[#151515] dark:text-gray-100 dark:placeholder:text-gray-500 dark:hover:border-gray-300 dark:focus:border-gray-100 dark:disabled:bg-gray-800 dark:aria-invalid:border-sinal-500 dark:aria-invalid:bg-sinal-950;
+    @apply block min-h-12 w-full rounded-[3px] border border-asfalto-400 bg-caderno px-3 py-2 text-base text-tinta placeholder:text-asfalto-600 hover:border-tinta focus:border-tinta disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 aria-invalid:border-sinal-600 aria-invalid:bg-sinal-50 dark:border-asfalto-600 dark:bg-noite-campo dark:text-gray-100 dark:placeholder:text-asfalto-400 dark:hover:border-asfalto-200 dark:focus:border-gray-100 dark:disabled:bg-asfalto-800 dark:aria-invalid:border-sinal-300 dark:aria-invalid:bg-sinal-950;
   }
 
-  /* Opção de rádio/caixa de seleção em formato de bloco tocável */
+  /* Opção de rádio/caixa de seleção em formato de bloco tocável; marcada = asfalto com faixa âmbar */
   .opcao {
-    @apply flex min-h-12 cursor-pointer items-start gap-3 border border-linha bg-white px-3 py-3 text-sm transition-colors hover:border-tinta has-[:checked]:border-tinta has-[:checked]:bg-tinta has-[:checked]:text-white dark:border-gray-700 dark:bg-[#151515] dark:hover:border-gray-300 dark:has-[:checked]:border-gray-100 dark:has-[:checked]:bg-gray-100 dark:has-[:checked]:text-tinta;
+    @apply flex min-h-12 cursor-pointer items-start gap-3 rounded-[3px] border border-linha bg-caderno px-3 py-3 text-sm transition-colors hover:border-tinta has-[:checked]:border-tinta has-[:checked]:bg-tinta has-[:checked]:text-white has-[:checked]:shadow-[inset_4px_0_0_var(--color-poste-400)] dark:border-asfalto-700 dark:bg-noite-campo dark:hover:border-asfalto-200 dark:has-[:checked]:border-poste-400 dark:has-[:checked]:bg-asfalto-800;
   }
 
-  /* Botões: retos, com seta opcional; primário = tinta, destaque = sinal */
+  /* Botões: primário = asfalto; poste = âmbar (chamada principal); destaque = tijolo (destrutivo) */
   .btn {
-    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-none px-6 text-sm font-semibold tracking-wide uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-[3px] px-6 font-mono text-sm font-bold tracking-[0.08em] uppercase transition-[background-color,color,box-shadow,transform] disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primario {
-    @apply bg-tinta text-white hover:bg-sinal-600 active:bg-sinal-700 dark:bg-gray-100 dark:text-tinta dark:hover:bg-sinal-500;
+    @apply bg-tinta text-white hover:bg-asfalto-700 active:bg-asfalto-950 dark:bg-poste-400 dark:text-tinta dark:hover:bg-poste-300;
+  }
+  .btn-poste {
+    @apply bg-poste-400 text-tinta hover:bg-poste-300 hover:shadow-poste active:bg-poste-500;
   }
   .btn-destaque {
     @apply bg-sinal-600 text-white hover:bg-sinal-700 active:bg-tinta;
   }
   .btn-secundario {
-    @apply border border-tinta bg-transparent hover:bg-tinta hover:text-white dark:border-gray-300 dark:hover:bg-gray-100 dark:hover:text-tinta;
+    @apply border border-tinta bg-transparent hover:bg-tinta hover:text-white dark:border-asfalto-200 dark:hover:bg-gray-100 dark:hover:text-tinta;
   }
 
   /* Cartão que contém um formulário ou bloco de conteúdo */
   .cartao {
-    @apply border border-linha bg-white p-5 md:p-8 dark:border-gray-800 dark:bg-[#121212];
+    @apply rounded-[3px] border border-linha bg-caderno p-5 md:p-8 dark:border-asfalto-800 dark:bg-noite-superficie;
   }
 
-  /* Link de texto com sublinhado grosso em vermelho */
+  /* Ficha de caderneta (formulários): margem de fichário em tijolo, discreta */
+  .ficha-caderno {
+    @apply relative md:pl-12;
+  }
+  .ficha-caderno::before {
+    content: "";
+    @apply pointer-events-none absolute inset-y-0 left-6 hidden w-px bg-sinal-300/70 md:block dark:bg-sinal-300/30;
+  }
+
+  /* Link de texto com sublinhado grosso âmbar */
   .link {
-    @apply font-medium underline decoration-sinal-500 decoration-2 underline-offset-4 hover:text-sinal-700 dark:hover:text-sinal-500;
+    @apply font-semibold underline decoration-poste-500 decoration-2 underline-offset-4 hover:text-poste-800 dark:hover:text-poste-300;
   }
 
   /* Mensagens de feedback */
   .alerta {
-    @apply flex items-start gap-2 border-l-4 p-3 text-sm;
+    @apply flex items-start gap-2 rounded-[3px] border-l-4 p-3 text-sm;
   }
   .alerta-erro {
-    @apply border-sinal-600 bg-sinal-50 text-sinal-700 dark:border-sinal-500 dark:bg-sinal-950 dark:text-sinal-100;
+    @apply border-sinal-600 bg-sinal-50 text-sinal-700 dark:border-sinal-300 dark:bg-sinal-950 dark:text-sinal-100;
   }
   .alerta-sucesso {
-    @apply border-tinta bg-white text-tinta dark:border-gray-100 dark:bg-[#151515] dark:text-gray-100;
+    @apply border-placa-600 bg-placa-50 text-placa-700 dark:border-placa-500 dark:bg-asfalto-800 dark:text-gray-100;
   }
   .alerta-info {
-    @apply border-gray-500 bg-gray-100 text-gray-900 dark:border-gray-400 dark:bg-gray-900 dark:text-gray-100;
+    @apply border-asfalto-600 bg-asfalto-200/50 text-tinta dark:border-asfalto-400 dark:bg-asfalto-800 dark:text-gray-100;
+  }
+
+  /* Faixa de pedestre: divisor de seção (decorativo) */
+  .faixa-pedestre {
+    @apply h-4 w-full;
+    background: repeating-linear-gradient(90deg, var(--color-tinta) 0 28px, transparent 28px 52px);
+    opacity: 0.9;
+  }
+  @media (prefers-color-scheme: dark) {
+    .faixa-pedestre {
+      background: repeating-linear-gradient(90deg, var(--color-papel) 0 28px, transparent 28px 52px);
+      opacity: 0.25;
+    }
+  }
+
+  /* Asfalto com textura sutil (ruído) — superfícies escuras */
+  .asfalto {
+    background-color: var(--color-asfalto-900);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Malha de mapa urbano (quadras e ruas) para fundos */
+  .malha-ruas {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.06) 2px, transparent 2px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.06) 2px, transparent 2px),
+      linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.025) 1px, transparent 1px);
+    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  }
+  .malha-ruas-clara {
+    background-image:
+      linear-gradient(rgb(23 33 42 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(23 33 42 / 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Placa de rua (cartões de acesso rápido) */
+  .placa {
+    @apply relative flex flex-col gap-4 rounded-[10px] p-5 text-white transition-[transform,box-shadow] duration-200 md:p-7;
+    box-shadow: inset 0 0 0 3px var(--placa-fundo, var(--color-placa-600)), inset 0 0 0 5px rgb(255 255 255 / 0.9);
+    background-color: var(--placa-fundo, var(--color-placa-600));
+  }
+  .placa-asfalto {
+    --placa-fundo: var(--color-asfalto-800);
+  }
+
+  /* Folha de caderneta de campo: pauta azul-clara e margem em tijolo (decorativas) */
+  .caderneta {
+    --margem: 2.25rem;
+    background-color: var(--color-caderno);
+    background-image:
+      linear-gradient(90deg, transparent var(--margem), rgb(196 71 43 / 0.45) var(--margem), rgb(196 71 43 / 0.45) calc(var(--margem) + 1px), transparent calc(var(--margem) + 1px)),
+      repeating-linear-gradient(to bottom, transparent 0 calc(2rem - 1px), rgb(29 95 168 / 0.12) calc(2rem - 1px) 2rem);
+  }
+  @media (min-width: 768px) {
+    .caderneta {
+      --margem: 3.75rem;
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    .caderneta {
+      background-color: var(--color-noite-superficie);
+      background-image:
+        linear-gradient(90deg, transparent var(--margem), rgb(240 160 140 / 0.3) var(--margem), rgb(240 160 140 / 0.3) calc(var(--margem) + 1px), transparent calc(var(--margem) + 1px)),
+        repeating-linear-gradient(to bottom, transparent 0 calc(2rem - 1px), rgb(197 206 213 / 0.08) calc(2rem - 1px) 2rem);
+    }
+  }
+
+  /* Carimbo (ex.: "Cadastro enviado") */
+  .carimbo {
+    @apply inline-flex flex-col items-center rounded-[6px] border-[3px] border-double px-4 py-2 font-mono text-xs font-bold tracking-[0.16em] uppercase;
+    transform: rotate(-6deg);
+  }
+}
+
+/* ---------- Movimento ---------- */
+@keyframes desenhar-linha {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes estacao-surge {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+@keyframes estacao-pulsa {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+/* sem clip-path: ele cortaria os acentos das maiúsculas (É, Á) acima da altura da linha */
+@keyframes subir-camada {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+}
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes proxima-parada {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+@keyframes carimbar {
+  0% {
+    opacity: 0;
+    transform: rotate(-6deg) scale(1.8);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-6deg) scale(0.94);
+  }
+  100% {
+    transform: rotate(-6deg) scale(1);
+  }
+}
+@keyframes paralaxe {
+  to {
+    transform: translateY(18%);
+  }
+}
+@keyframes encher-linha {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+/* Linha de metrô do hero: desenha, depois as estações surgem e pulsam (escalonado por --i) */
+/* use pathLength="1" no <path> */
+.linha-desenha {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: desenhar-linha 2.2s cubic-bezier(0.65, 0, 0.35, 1) 0.35s forwards;
+}
+.estacao {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: estacao-surge 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(0.6s + var(--i, 0) * 0.38s);
+}
+.estacao-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: estacao-pulsa 2.6s ease-out infinite;
+  animation-delay: calc(2.4s + var(--i, 0) * 0.3s);
+  opacity: 0;
+}
+
+/* Título em camadas */
+.camada {
+  display: block;
+  animation: subir-camada 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(0.1s + var(--i, 0) * 0.12s);
+}
+.entra {
+  animation: aparecer 0.6s ease-out both;
+  animation-delay: calc(0.5s + var(--i, 0) * 0.1s);
+}
+
+/* Formulário: a etapa visível entra deslizando como "próxima parada" (o hidden->visível reinicia a animação) */
+.etapa:not([hidden]) {
+  animation: proxima-parada 0.28s ease-out both;
+}
+@keyframes carimbo-estacao {
+  from {
+    transform: scale(1.6) rotate(-12deg);
+    opacity: 0;
+  }
+}
+.carimbo-estacao {
+  animation: carimbo-estacao 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.carimbo-animado {
+  animation: carimbar 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+
+/* Revelação ao rolar e paralaxe: só onde o navegador tem animações guiadas por rolagem (sem JS) */
+@supports (animation-timeline: view()) {
+  .revelar {
+    animation: aparecer linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+  .paralaxe {
+    animation: paralaxe linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+  .linha-rolagem {
+    transform-origin: top;
+    animation: encher-linha linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 70%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important; /* sem esperar a entrada escalonada: tudo já no estado final */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .revelar,
+  .paralaxe,
+  .linha-rolagem,
+  .estacao-halo {
+    animation: none !important;
   }
 }

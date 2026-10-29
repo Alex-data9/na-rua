@@ -8,7 +8,7 @@ export function ExcluirCadastro({ nome, excluindo }: { nome: string; excluindo: 
   const caixa = useRef<HTMLDialogElement>(null);
 
   return (
-    <section className="cartao border-sinal-600 dark:border-sinal-500" aria-labelledby="titulo-excluir">
+    <section className="cartao border-sinal-600 dark:border-sinal-300" aria-labelledby="titulo-excluir">
       <h2 id="titulo-excluir" className="titulo-display mb-2 text-xl">Excluir cadastro</h2>
       <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">
         Remove definitivamente este cadastro, as anotações e a foto da base. Não há como desfazer.

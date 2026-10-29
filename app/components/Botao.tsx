@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 
-export type VarianteBotao = "primario" | "secundario" | "destaque";
+export type VarianteBotao = "primario" | "secundario" | "destaque" | "poste";
 
 // Também serve para <Link>: <Link className={classeBotao("primario")}>.
 export const classeBotao = (variante: VarianteBotao = "primario", extra = "") =>

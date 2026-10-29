@@ -86,7 +86,7 @@ export default function DetalhesPessoa() {
           <StatusEtiqueta status={pessoa.status} />
         </div>
         <h1 className="titulo-display text-4xl leading-none md:text-6xl">
-          {pessoa.nome}<span className="text-sinal-500">.</span>
+          {pessoa.nome}<span aria-hidden="true" className="text-poste-500">.</span>
         </h1>
         {pessoa.apelido && <p className="font-mono text-sm text-gray-600 dark:text-gray-400">“{pessoa.apelido}”</p>}
         {actionData?.intent === "status" && <Alerta tipo="sucesso">Status atualizado.</Alerta>}
@@ -197,7 +197,7 @@ export default function DetalhesPessoa() {
 
         <ul className="space-y-3">
           {notas.map((n) => (
-            <li key={n.id} className="border-l-2 border-sinal-500 bg-papel p-3 text-sm dark:bg-[#0b0b0b]">
+            <li key={n.id} className="border-l-2 border-poste-500 bg-papel p-3 text-sm dark:bg-noite">
               <p className="whitespace-pre-line break-words">{n.texto}</p>
               <p className="mt-2 font-mono text-[11px] tracking-[0.08em] uppercase text-gray-600 dark:text-gray-400">
                 {n.autor} — {new Date(n.ts).toLocaleString("pt-BR")}

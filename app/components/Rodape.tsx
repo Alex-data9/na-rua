@@ -18,7 +18,12 @@ export function Rodape() {
           </div>
         </div>
       </div>
-      <div className="h-2 bg-sinal-500" aria-hidden="true" />
+      {/* faixa de pedestre clara sobre o asfalto */}
+      <div
+        aria-hidden="true"
+        className="h-3 opacity-80"
+        style={{ background: "repeating-linear-gradient(90deg, var(--color-papel) 0 28px, transparent 28px 52px)" }}
+      />
     </footer>
   );
 }

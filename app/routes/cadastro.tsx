@@ -31,6 +31,7 @@ import {
   type Erros,
 } from "~/utils/cadastro";
 import { dataLocalIso, mascaraCpf, mascaraNis, mascaraTelefone } from "~/utils/validators";
+import { doisDigitos } from "~/utils/numeros";
 
 const TOTAL_STEPS = TITULOS_ETAPAS.length;
 
@@ -190,15 +191,15 @@ export default function Cadastro() {
     <main className="mx-auto max-w-3xl px-4 py-8 md:py-12">
       <div className="mb-8 border-b border-tinta pb-6 dark:border-gray-700">
         <p className="rotulo-tecnico mb-3">Formulário Suplementar 2 — Cadastro Único</p>
-        <h1 className="titulo-display text-4xl md:text-5xl">Novo cadastro<span className="text-sinal-500">.</span></h1>
+        <h1 className="titulo-display text-4xl md:text-5xl">Novo cadastro<span aria-hidden="true" className="text-poste-500">.</span></h1>
         <p className="mt-3 text-sm text-gray-700 dark:text-gray-300">
           Pessoa em situação de rua — Formulário Suplementar 2 do Cadastro Único (MDS). Campos marcados com{" "}
-          <span aria-hidden="true" className="text-sinal-700 dark:text-sinal-500">*</span>
+          <span aria-hidden="true" className="text-sinal-700 dark:text-sinal-300">*</span>
           <span className="sr-only">asterisco</span> são obrigatórios.
         </p>
       </div>
 
-      <div className="cartao space-y-6">
+      <div className="cartao ficha-caderno space-y-6">
         <ProgressBar step={step} totalSteps={TOTAL_STEPS} titulos={TITULOS_ETAPAS} />
 
         {actionData?.erro && <Alerta tipo="erro">{actionData.erro}</Alerta>}
@@ -207,7 +208,7 @@ export default function Cadastro() {
         )}
 
         <h2 ref={tituloEtapa} tabIndex={-1} className="flex items-baseline gap-3 outline-offset-4">
-          <span className="font-mono text-sm font-semibold text-sinal-700 dark:text-sinal-500">{String(step).padStart(2, "0")}</span>
+          <span className="font-mono text-sm font-semibold text-poste-800 dark:text-poste-400">{doisDigitos(step)}</span>
           <span className="titulo-display text-2xl md:text-3xl">{TITULOS_ETAPAS[step - 1]}</span>
         </h2>
 
@@ -222,7 +223,7 @@ export default function Cadastro() {
           onSubmit={aoEnviar}
           className="space-y-6"
         >
-          <fieldset hidden={step !== 1} className="space-y-5">
+          <fieldset hidden={step !== 1} className="etapa space-y-5">
             <legend className="sr-only">{TITULOS_ETAPAS[0]}</legend>
             <GrupoOpcoes legenda="1.07 Modalidade da operação" name="modalidade_operacao" tipo="radio" obrigatorio
               opcoes={MODALIDADE_OPERACAO} defaultValue="1" erro={erros.modalidade_operacao} />
@@ -252,7 +253,7 @@ export default function Cadastro() {
             <Campo label="1.13 Observações" name="obs" textarea maxLength={500} erro={erros.obs} />
           </fieldset>
 
-          <fieldset hidden={step !== 2} className="space-y-5">
+          <fieldset hidden={step !== 2} className="etapa space-y-5">
             <legend className="sr-only">{TITULOS_ETAPAS[1]}</legend>
             <Campo label="2.02 Nome completo" name="nome" maxLength={70} obrigatorio
               dica="Copie do documento oficial, sem abreviar. Um só nome é aceito apenas para quem não tem nenhum documento."
@@ -285,7 +286,7 @@ export default function Cadastro() {
             </Linha>
           </fieldset>
 
-          <fieldset hidden={step !== 3} className="space-y-5">
+          <fieldset hidden={step !== 3} className="etapa space-y-5">
             <legend className="sr-only">{TITULOS_ETAPAS[2]}</legend>
             <DiasPorSemana erro={erros.dorme_dias} />
             <Linha>
@@ -308,7 +309,7 @@ export default function Cadastro() {
             </Linha>
           </fieldset>
 
-          <fieldset hidden={step !== 4} className="space-y-5">
+          <fieldset hidden={step !== 4} className="etapa space-y-5">
             <legend className="sr-only">{TITULOS_ETAPAS[3]}</legend>
             <GrupoOpcoes legenda="2.10 Nos últimos seis meses, frequentou ou participou de alguma atividade comunitária?"
               name="atividades_comunitarias" tipo="checkbox" opcoes={ATIVIDADES_COMUNITARIAS} obrigatorio
@@ -323,7 +324,7 @@ export default function Cadastro() {
               erro={erros.atividades_renda} />
           </fieldset>
 
-          <fieldset hidden={step !== 5} className="space-y-5">
+          <fieldset hidden={step !== 5} className="etapa space-y-5">
             <legend className="sr-only">{TITULOS_ETAPAS[4]}</legend>
             <Marca name="consentimento_lgpd" erro={erros.consentimento_lgpd} obrigatorio
               label="A pessoa entrevistada consentiu com o uso destes dados (LGPD)" />

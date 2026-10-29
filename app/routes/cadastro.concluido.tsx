@@ -15,9 +15,20 @@ export default function CadastroConcluido() {
   return (
     <main className="mx-auto max-w-2xl space-y-6 px-4 py-10 md:py-16">
       <p className="rotulo-tecnico">Cadastro</p>
-      <h1 className="titulo-display text-4xl md:text-5xl">
-        Cadastro enviado<span className="text-sinal-500">.</span>
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-6">
+        <h1 className="titulo-display text-5xl md:text-6xl">
+          Cadastro enviado<span aria-hidden="true" className="text-poste-500">.</span>
+        </h1>
+        {/* carimbo da caderneta (decorativo: a mesma informação está no aviso abaixo) */}
+        <span
+          aria-hidden="true"
+          className="carimbo carimbo-animado border-placa-600 text-placa-600 dark:border-placa-500 dark:text-placa-500"
+        >
+          <span>NaRua</span>
+          <span className="font-display text-xl tracking-[0.06em]">Cadastro concluído</span>
+          {codigo && <span>Nº {codigo}</span>}
+        </span>
+      </div>
       <Alerta tipo="sucesso">
         As informações foram registradas com sucesso{codigo ? <> (código <strong>{codigo}</strong>)</> : null}.
       </Alerta>
